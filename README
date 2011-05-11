@@ -1,0 +1,3 @@
+Author: Brian Le (brian@clickin.com.au)
+
+This project created a tool to centrally manage many Facebook apps at the same time. It was written in Python/Django and deployed on Google App Engine.
