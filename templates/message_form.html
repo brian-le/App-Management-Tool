@@ -1,0 +1,88 @@
+<html>
+  <head>
+  	<title>{{ app.name }} - Post Messages</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css" />
+  </head>
+  <body>
+  	<h3>{{ app.name }} - Post Messages</h3>
+  	<form name="post_form" action="http://click-in.appspot.com/post_messages" method="POST">
+  		<div>
+  		<input type="hidden"  name="app_id" value="{{ app.app_id }}"/>	
+  		<table id="users">
+			<tr>
+				<th></th>
+				<th>Name</th>
+				<th>User ID</th>
+				<th>Email</th>
+			</tr>
+			{% for user in users %}
+				<tr>
+					<td><input type="checkbox" name="selected_users" value="{{ user.id }}" /></td>
+					<td><a href="{{  user.profile_url }}"><em>{{ user.name }}</em></a></td>
+					<td>{{ user.id }}</td>
+					<td>{{ user.email }}</td>
+				</tr>
+    		{% endfor %}     	
+    	</table>
+    	<br>
+    	<em>Message</em><br/>
+
+	    <textarea name="message" cols="40" rows="8">Please write here the message to be posted on the above users' Facebook walls.</textarea>
+		<br /><br />
+		<em>Schedule time to post</em> <br />
+		<input type="checkbox" name="schedule" value="gets_online" /> When user gets online <br />
+		<input type="checkbox" name="schedule" value="changes_status" /> When user changes status <br />
+		<input type="checkbox" name="schedule" value="later" checked="checked"/> At the following time (GMT) <br />
+		
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Month 
+		<select name="month">
+			<option value="1">January</option>
+			<option value="2">February</option>
+			<option value="3">Match</option>
+			<option value="4">April</option>
+			<option value="5">May</option>
+			<option value="6">June</option>
+			<option value="7">July</option>
+			<option value="8">August</option>
+			<option value="9">September</option>
+			<option value="10">October</option>
+			<option value="11">November</option>
+			<option value="12">December</option>
+		</select>
+		
+		Date
+		<select name="date">
+			{% for date in date_range %}
+				<option value="{{ date }}">{{ date }}</option>
+			{% endfor %}
+		</select>
+		
+		Year
+		<select name="year">
+			{% for year in year_range %}
+				<option value="{{ year }}">{{ year }}</option>
+			{% endfor %}
+		</select
+
+		<br><br>
+		
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hour
+		<select name="hour">
+			{% for hour in hour_range %}
+				<option value="{{ hour }}">{{ hour }}</option>
+			{% endfor %}
+		</select>
+		
+		Minute
+		<select name="minute">
+			{% for minute in minute_range %}
+				<option value="{{ minute }}">{{ minute }}</option>
+			{% endfor %}
+		</select>
+		<br><br>
+		<input type="submit" value="Post on Facebook Walls" />
+		</div>
+    </form> 
+  </body>
+</html>
+	

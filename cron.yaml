@@ -1,0 +1,4 @@
+cron:
+- description: constantly monitoring users online presence
+  url: /tasks/monitor
+  schedule: every 2 minutes

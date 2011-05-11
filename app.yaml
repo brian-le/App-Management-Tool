@@ -1,0 +1,14 @@
+application: click-in
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /html
+  static_dir: html
+  
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /.*
+  script: main.py
