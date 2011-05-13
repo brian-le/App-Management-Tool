@@ -37,7 +37,7 @@ class Client1Handler(BaseClientHandler):
     def get(self):
         # The populating should run only once
         #self.populate_datastore() 
-        admin2 = Client_User.get_by_key_name('admin06')
+        admin2 = Client_User.get_by_key_name('admin001')
         apps = admin2.client.apps
         self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
         
