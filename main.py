@@ -20,56 +20,19 @@ from google.appengine.ext import db
 from google.appengine.api import taskqueue
 from google.appengine.ext.webapp import template
 
-class Client(db.Model):
-    id = db.StringProperty(required=True)
-    name = db.StringProperty(required=True)
-    created = db.DateTimeProperty(required=True, auto_now_add=True)
-    last_modified = db.DateTimeProperty(required=True, auto_now=True)
-    domain = db.LinkProperty(required=True)
-    
-class Client_User(db.Model):
-    # A client may have many users using different Facebook apps developed by the client
-    client = db.ReferenceProperty(Client, collection_name='client_users')
-    id = db.StringProperty(required=True)
-    name = db.StringProperty(required=True)
-    email = db.EmailProperty()
-    created = db.DateTimeProperty(required=True, auto_now_add=True)
-    last_modified = db.DateTimeProperty(required=True, auto_now=True)
-    password = db.StringProperty(required=True)
-    
-class App(db.Model):
-    client = db.ReferenceProperty(Client, collection_name='apps')
-    app_id = db.StringProperty(required=True)
-    api_key = db.StringProperty(required=True)
-    app_secret = db.StringProperty(required=True)
-    name = db.StringProperty(required=True)
-    domain = db.LinkProperty(required=True)
+from models import Client 
+from models import Client_User
+from models import App
+from models import App_User
+from models import MonitoredUser
 
-class App_User(db.Model):
-    app_id = db.StringProperty(required=True)#reference property, should fix here. A workaround.
-    id = db.StringProperty(required=True)
-    name = db.StringProperty(required=True)
-    email = db.EmailProperty()
-    profile_url = db.StringProperty(required=True)
-    access_token = db.StringProperty(required=True)
-    token_status = db.StringProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    updated = db.DateTimeProperty(auto_now=True)
-
-class MonitoredUser(db.Model):
-    id = db.StringProperty(required=True)
-    app_id = db.StringProperty(required=True)
-    last_online_presence = db.StringProperty(required=True, default="error")
-    message = db.StringProperty()
-    access_token = db.StringProperty(required=True)
-    time_to_post = db.DateTimeProperty(default=None)
 
 class BaseClientHandler(webapp.RequestHandler):
     def render(self, name, **data):
         """Render a template in the 'templates' folder."""
         self.response.out.write(template.render(os.path.join(os.path.dirname(__file__), 'templates', name + '.html'), data))
 
-    
+
 class Client1Handler(BaseClientHandler):
     def get(self):
         # The populating should run only once
@@ -143,8 +106,8 @@ class Client2Handler(BaseClientHandler):
         
 class StartHandler(BaseClientHandler):
     def post(self):
-        self.response.out.write("Admin ID: " + self.request.get("admin") + "<br />\n")
-        self.response.out.write("Admin's App ID: " + self.request.get("app") + "<br />\n")
+        #self.response.out.write("Admin ID: " + self.request.get("admin") + "<br />\n")
+        #self.response.out.write("Admin's App ID: " + self.request.get("app") + "<br />\n")
         app_id = self.request.get("app")
         apps = App.all()
         apps.filter('app_id =', app_id)
@@ -199,7 +162,8 @@ class GetAccessTokenHandler(BaseClientHandler):
             set_cookie(self.response, "fb_user", str(profile["id"]),
                        expires=time.time() + 30 * 86400, secret=app_secret)
             
-            self.redirect("/show_users?app_id="+app_id)
+            encoded_app_id = base64.b64encode(app_id)
+            self.redirect("/show_users?app_id=" + encoded_app_id)
         else:
             scope = cgi.escape(self.request.get("scope"))
             custom_scope = "&scope=" + scope
@@ -208,7 +172,8 @@ class GetAccessTokenHandler(BaseClientHandler):
         
 class ShowSelectedUsersHandler(BaseClientHandler):
     def get(self):
-        app_id=self.request.get("app_id")
+        encoded_app_id = self.request.get("app_id")
+        app_id = base64.b64decode(encoded_app_id)
         selected_users = db.Query(App_User).filter('app_id =', app_id)
         app = db.Query(App).filter("app_id =", app_id).get()                    
         self.render(u'message_form', app=app, users=selected_users, date_range=range(1, 32), year_range=range(2011, 2021), 
@@ -220,13 +185,6 @@ class PostMessagesHandler(BaseClientHandler):
         message = cgi.escape(self.request.get("message"))
         selected_user_ids = self.request.get_all("selected_users")
         selected_users = db.Query(App_User).filter("app_id =", app_id).filter("id IN ", selected_user_ids)
-        
-        """
-        self.response.out.write("App ID: " + app_id + "<br />")
-        self.response.out.write("Selected users: ")
-        self.response.out.write(selected_users)
-        self.response.out.write("<br />Message: " + message)
-        """
         
         schedule = self.request.get_all("schedule")
         time_to_post=None
@@ -329,27 +287,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-"""    
-def main():
-    application = webapp.WSGIApplication([
-    ('/', Client1Handler),
-    (r"/start", StartHandler),
-    (r"/permissions", PermissionsHandler),
-    (r"/gettoken", GetAccessTokenHandler),
-    (r"/show_users", ShowSelectedUsersHandler),
-    (r"/post_messages", PostMessagesHandler),
-    (r"/post_a_message", Post_A_Message),
-    (r"/tasks/monitor", OnlinePresenceMonitor),
-    ('/(.*)', Client1Handler)], debug=True)
-
-                                     
-    run_wsgi_app(application)
-
-if __name__ == "__main__":
-    main()
-
-"""
 
 def set_cookie(response, name, value, domain=None, path="/", expires=None, secret=""):
     """Generates and signs a cookie for the give name/value"""
