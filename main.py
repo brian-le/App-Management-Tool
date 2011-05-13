@@ -102,7 +102,10 @@ class Client1Handler(BaseClientHandler):
 
 class Client2Handler(BaseClientHandler):
     def get(self):
-        self.response.out.write("You are Client 02!") 
+        admin2 = Client_User.get_by_key_name('admin05')
+        apps = admin2.client.apps
+        self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
+
         
 class StartHandler(BaseClientHandler):
     def post(self):
@@ -239,10 +242,6 @@ class Post_A_Message(webapp.RequestHandler):
 
 class OnlinePresenceMonitor(webapp.RequestHandler):
     def get(self):
-        monitored_users=MonitoredUser.all()
-        for user in monitored_users:
-            logging.debug("Serving user " + user.id + " | Message: " + user.message)
-    
         monitored_users=MonitoredUser.all()
        
         for user in monitored_users:
