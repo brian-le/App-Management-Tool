@@ -37,7 +37,7 @@ class Client1Handler(BaseClientHandler):
     def get(self):
         # The populating should run only once
         #self.populate_datastore() 
-        admin2 = Client_User.get_by_key_name('admin001')
+        admin2 = Client_User.get_by_key_name('admin05')
         apps = admin2.client.apps
         self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
         
@@ -98,15 +98,19 @@ class Client1Handler(BaseClientHandler):
                    domain=db.Link("http://app1.client2.click-in.appspot.com/"))
 
         app3.put()      
-        
 
+class Client1SearchHandler(BaseClientHandler):
+    def get(self):
+        admin2 = Client_User.get_by_key_name('admin05')
+        apps = admin2.client.apps
+        self.render(u'select_app_to_search', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)        
+                
 class Client2Handler(BaseClientHandler):
     def get(self):
         admin2 = Client_User.get_by_key_name('admin05')
         apps = admin2.client.apps
         self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
-
-        
+       
 class StartHandler(BaseClientHandler):
     def post(self):
         #self.response.out.write("Admin ID: " + self.request.get("admin") + "<br />\n")
@@ -159,7 +163,7 @@ class GetAccessTokenHandler(BaseClientHandler):
             user_id = str(profile["id"])
             key_name = app_id + "_" + user_id
             user = App_User(key_name=key_name, id=user_id, app_id=app_id,
-                        name=profile["name"], access_token=access_token,
+                        name=profile["name"], email=profile["email"], access_token=access_token,
                         profile_url=profile["link"], token_status="Active")
             user.put()
             set_cookie(self.response, "fb_user", str(profile["id"]),
@@ -262,9 +266,27 @@ class OnlinePresenceMonitor(webapp.RequestHandler):
                     graph.put_wall_post(message=message, profile_id=user.id)
                     logging.debug("Online posting User ID " + user.id + " | Message: " + message)
                     user.delete() #remove this user's pending post from the cron list
+
+class SearchHandler(BaseClientHandler):    
+    def get(self):
+        encoded_app_id = cgi.escape(self.request.get("app"))
+        query = cgi.escape(self.request.get("query"))
+        if (not query):
+            self.render(u'search_form', app_id=encoded_app_id)
+        else:
+            app_id = base64.b64decode(encoded_app_id)
+            self.response.out.write("The app_id is " + app_id + "<br />\n")
+            self.response.out.write("The query is '" + query + "'<br />\n")    
+
+    def post(self):
+        app_id = cgi.escape(self.request.get("app"))
+        encoded_app_id = base64.b64encode(app_id)
+        self.redirect("/search?app=" + encoded_app_id)
+ 
 clients = {
   'client1.click-in.appspot.com': webapp.WSGIApplication([
     ('/', Client1Handler),
+    (r"/search", Client1SearchHandler),
     ('/(.*)', Client1Handler)]),
            
   'client2.click-in.appspot.com': webapp.WSGIApplication([
@@ -278,7 +300,8 @@ clients = {
     (r"/show_users", ShowSelectedUsersHandler),
     (r"/post_messages", PostMessagesHandler),
     (r"/post_a_message", Post_A_Message), 
-    (r"/tasks/monitor", OnlinePresenceMonitor)])
+    (r"/tasks/monitor", OnlinePresenceMonitor),
+    (r"/search", SearchHandler)])
 }
 
 def main():
@@ -322,3 +345,5 @@ def check_online_presence(user):
     if len(result)==1:
         online_presence=result[0]['online_presence']            
     return online_presence
+    
+
