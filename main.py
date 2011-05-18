@@ -37,9 +37,14 @@ class Client1Handler(BaseClientHandler):
     def get(self):
         # The populating should run only once
         #self.populate_datastore() 
+        
+        """
         admin2 = Client_User.get_by_key_name('admin05')
         apps = admin2.client.apps
         self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
+        
+        """
+        self.render(u'aussie')
         
     def populate_datastore(self):
         client_key_name1='client01'
@@ -271,7 +276,10 @@ class SearchHandler(BaseClientHandler):
     def get(self):
         encoded_app_id = cgi.escape(self.request.get("app"))
         query = cgi.escape(self.request.get("query"))
-        #Remove leading and trailing white spaces
+        
+        #Remove leading, trailing, and multiple white spaces from the string query.
+        query = ' '.join(query.split())
+        
         if (not query):
             self.render(u'search_form', app_id=encoded_app_id)
         else:
@@ -284,9 +292,10 @@ class SearchHandler(BaseClientHandler):
             for result_type in [results_by_name, results_by_email, results_by_id]:
                 for p in result_type:
                     results.add(p)
-                    
-            for p in results:
-                self.response.out.write("%s | %s | %s<br />\n" % (p.name, p.id, p.email))                
+
+            self.render(u'search_results', users=results)
+            #for p in results:
+            #    self.response.out.write("%s | %s | %s<br />\n" % (p.name, p.id, p.email))                
 
     def post(self):
         app_id = cgi.escape(self.request.get("app"))

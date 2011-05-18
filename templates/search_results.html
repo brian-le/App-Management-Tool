@@ -1,0 +1,25 @@
+<html>
+  <head>
+  	<title>Search Results</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/fancy_table.css" />
+  </head>
+  <body>
+    <h3>Search Results</h3>
+  		<div>
+  		<table class="fancy" id="users">
+			<tr>
+				<th>Name</th>
+				<th>User ID</th>
+				<th>Email</th>
+			</tr>
+			{% for user in users %}
+				<tr>
+					<td><a href="{{  user.profile_url }}"><em>{{ user.name }}</em></a></td>
+					<td>{{ user.id }}</td>
+					<td>{{ user.email }}</td>
+				</tr>
+    		{% endfor %}     	
+    	</table>
+		</div>
+  </body>
+</html>
