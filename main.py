@@ -271,17 +271,35 @@ class SearchHandler(BaseClientHandler):
     def get(self):
         encoded_app_id = cgi.escape(self.request.get("app"))
         query = cgi.escape(self.request.get("query"))
+        #Remove leading and trailing white spaces
         if (not query):
             self.render(u'search_form', app_id=encoded_app_id)
         else:
             app_id = base64.b64decode(encoded_app_id)
-            self.response.out.write("The app_id is " + app_id + "<br />\n")
-            self.response.out.write("The query is '" + query + "'<br />\n")    
+            results = set()
+            results_by_name = self.search_by(app_id, property="name", value=query)
+            results_by_email = self.search_by(app_id, property="email", value=query)
+            results_by_id = self.search_by(app_id, property="id", value=query)
+            
+            for result_type in [results_by_name, results_by_email, results_by_id]:
+                for p in result_type:
+                    results.add(p)
+                    
+            for p in results:
+                self.response.out.write("%s | %s | %s<br />\n" % (p.name, p.id, p.email))                
 
     def post(self):
         app_id = cgi.escape(self.request.get("app"))
         encoded_app_id = base64.b64encode(app_id)
         self.redirect("/search?app=" + encoded_app_id)
+        
+    def search_by(self, app_id, property, value):
+        q = App_User.all()
+        all = q.count()
+        q.filter("app_id =", app_id).filter(property + " =", value)
+        results = q.fetch(all)
+        return results
+    
  
 clients = {
   'client1.click-in.appspot.com': webapp.WSGIApplication([
