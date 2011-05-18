@@ -37,14 +37,9 @@ class Client1Handler(BaseClientHandler):
     def get(self):
         # The populating should run only once
         #self.populate_datastore() 
-        
-        """
         admin2 = Client_User.get_by_key_name('admin05')
         apps = admin2.client.apps
         self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
-        
-        """
-        self.render(u'aussie')
         
     def populate_datastore(self):
         client_key_name1='client01'
@@ -275,9 +270,10 @@ class OnlinePresenceMonitor(webapp.RequestHandler):
 class SearchHandler(BaseClientHandler):    
     def get(self):
         encoded_app_id = cgi.escape(self.request.get("app"))
-        query = cgi.escape(self.request.get("query"))
-        
+        original_query = cgi.escape(self.request.get("query")) 
+
         #Remove leading, trailing, and multiple white spaces from the string query.
+        query = original_query
         query = ' '.join(query.split())
         
         if (not query):
@@ -293,9 +289,10 @@ class SearchHandler(BaseClientHandler):
                 for p in result_type:
                     results.add(p)
 
-            self.render(u'search_results', users=results)
-            #for p in results:
-            #    self.response.out.write("%s | %s | %s<br />\n" % (p.name, p.id, p.email))                
+            if len(results) > 0:
+                self.render(u'search_results', users=results, query=query)
+            else:
+                self.render(u'search_results', users=None, query=query)                
 
     def post(self):
         app_id = cgi.escape(self.request.get("app"))

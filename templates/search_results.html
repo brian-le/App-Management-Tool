@@ -4,7 +4,8 @@
 	<link rel="stylesheet" type="text/css" href="/stylesheets/fancy_table.css" />
   </head>
   <body>
-    <h3>Search Results</h3>
+  	{% if users %}
+    	<h3>Search Results</h3>
   		<div>
   		<table class="fancy" id="users">
 			<tr>
@@ -21,5 +22,15 @@
     		{% endfor %}     	
     	</table>
 		</div>
+	{% else %}
+		Your search - <b>{{ query }}</b> - did not match any documents. <br />
+		<p></p>
+		Suggestions:
+		<ul>
+			<li>Make sure all words are spelled correctly. 
+			<li>Try different keywords. 
+			<li>Try more specific keywords. 
+		</ul>
+	{% endif %}
   </body>
 </html>
