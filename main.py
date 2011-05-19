@@ -280,17 +280,9 @@ class SearchHandler(BaseClientHandler):
             self.render(u'search_form', app_id=encoded_app_id)
         else:
             app_id = base64.b64decode(encoded_app_id)
-            results = set()
-            results_by_name = self.search_by(app_id, property="name", value=query)
-            results_by_email = self.search_by(app_id, property="email", value=query)
-            results_by_id = self.search_by(app_id, property="id", value=query)
-            
-            for result_type in [results_by_name, results_by_email, results_by_id]:
-                for p in result_type:
-                    results.add(p)
-
+            results = self.search(app_id, query=query)
             if len(results) > 0:
-                self.render(u'search_results', users=results, query=query)
+                self.render(u'search_results', users=results)
             else:
                 self.render(u'search_results', users=None, query=query)                
 
@@ -299,13 +291,27 @@ class SearchHandler(BaseClientHandler):
         encoded_app_id = base64.b64encode(app_id)
         self.redirect("/search?app=" + encoded_app_id)
         
-    def search_by(self, app_id, property, value):
+    def search(self, app_id, query):
+        #case-insensitive matching
+        query = query.lower() 
         q = App_User.all()
         all = q.count()
-        q.filter("app_id =", app_id).filter(property + " =", value)
-        results = q.fetch(all)
+        q.filter("app_id =", app_id)
+        app_users = q.fetch(all)
+        results = set()
+         
+        for user in app_users:
+            name_index = user.name.lower().find(query)
+            id_index = user.id.lower().find(query)
+            email_index = -1
+            if user.email:
+                email_index = user.email.lower().find(query)
+            matches = name_index >= 0 or id_index >= 0 or email_index >= 0
+            if matches:
+                results.add(user) 
+                        
         return results
-    
+
  
 clients = {
   'client1.click-in.appspot.com': webapp.WSGIApplication([
