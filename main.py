@@ -269,27 +269,29 @@ class OnlinePresenceMonitor(webapp.RequestHandler):
 
 class SearchHandler(BaseClientHandler):    
     def get(self):
-        encoded_app_id = cgi.escape(self.request.get("app"))
-        original_query = cgi.escape(self.request.get("query")) 
-
-        #Remove leading, trailing, and multiple white spaces from the string query.
-        query = original_query
-        query = ' '.join(query.split())
+        app = cgi.escape(self.request.get("app"))
+        if app:
+            self.redirect("/search?app_id=" + base64.b64encode(app))
         
-        if (not query):
-            self.render(u'search_form', app_id=encoded_app_id)
-        else:
-            app_id = base64.b64decode(encoded_app_id)
-            results = self.search(app_id, query=query)
-            if len(results) > 0:
-                self.render(u'search_results', users=results)
+        app_id = cgi.escape(self.request.get("app_id"))
+        if app_id:
+            original_query = cgi.escape(self.request.get("query"))
+            if original_query:
+                app_id = base64.b64decode(app_id)
+                #Remove leading, trailing, and multiple white spaces from the string query.
+                query = original_query
+                query = ' '.join(query.split())
+                results = self.search(app_id, query=query)
+                if len(results) > 0:
+                    self.render(u'search_results', users=results)
+                else:
+                    self.render(u'search_results', users=None, query=query)                
             else:
-                self.render(u'search_results', users=None, query=query)                
+                self.render(u'search_form', app_id=app_id)
 
-    def post(self):
-        app_id = cgi.escape(self.request.get("app"))
-        encoded_app_id = base64.b64encode(app_id)
-        self.redirect("/search?app=" + encoded_app_id)
+        #app_id = cgi.escape(self.request.get("app"))
+        #encoded_app_id = base64.b64encode(app_id)
+        
         
     def search(self, app_id, query):
         #case-insensitive matching
