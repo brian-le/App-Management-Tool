@@ -1,120 +1,33 @@
-import os
-import cgi
-import urllib, urllib2
+import os, cgi
+import urllib, urllib2, logging
 import base64
-import time
-import Cookie
-import hashlib
-import hmac
-import email.utils
-import datetime
-import logging
+import time, datetime
 
 import facebook
 
 from django.utils import simplejson as json
-
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 from google.appengine.api import taskqueue
-from google.appengine.ext.webapp import template
 
-from models import Client 
-from models import Client_User
+from utils.base import BaseClientHandler
+from utils.cookies import set_cookie
+from utils.facebook import check_online_presence
 from models import App
 from models import App_User
 from models import MonitoredUser
+from clients.client1 import Client1Handler
+from clients.client1 import Client1SearchHandler
+from clients.client2 import Client2Handler
 
 
-class BaseClientHandler(webapp.RequestHandler):
-    def render(self, name, **data):
-        """Render a template in the 'templates' folder."""
-        self.response.out.write(template.render(os.path.join(os.path.dirname(__file__), 'templates', name + '.html'), data))
-
-
-class Client1Handler(BaseClientHandler):
+class MasterHandler(BaseClientHandler):
     def get(self):
-        # The populating should run only once
-        #self.populate_datastore() 
-        admin2 = Client_User.get_by_key_name('admin05')
-        apps = admin2.client.apps
-        self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
+        self.response.out.write("<center><b>Page under construction. Please check back later!</b></center>")
         
-    def populate_datastore(self):
-        client_key_name1='client01'
-        client1 = Client(key_name=client_key_name1, id='12345678', name='Organic Oranges LLC', domain=db.Link("http://client1.click-in.appspot.com"))
-        client1.put()
-        
-        admin_key_name1='admin001'
-        admin1 = Client_User(key_name=admin_key_name1, client=client1, id='001002', name='David Administrator', 
-                             email='dave@client1.com.au', password='SesameOil')
-        admin1.put()
-        
-        admin_key_name2='admin002'
-        admin2 = Client_User(key_name=admin_key_name2, client=client1, id='001005', name='John Admin', 
-                             email='johnny@client1.com.au', password='Coconut')
-        admin2.put()
-        
-        client_key_name2='client02'
-        client2 = Client(key_name=client_key_name2, id='87654321', name='Green Trees Inc.', domain=db.Link("http://client2.click-in.appspot.com"))
-        client2.put()
-
-        admin_key_name5='admin05'
-        admin5 = Client_User(key_name=admin_key_name5, client=client2, id='0010011', name='Joe Admin', 
-                             email='joe@client2.com.au', password='dragon123')
-        admin5.put()
-        
-        admin_key_name6='admin06'
-        admin6 = Client_User(key_name=admin_key_name6, client=client2, id='0010016', name='Tom Admin', 
-                             email='tommy@client2.com.au', password='dragonflies')
-        admin6.put()
-
-        
-        #ClickIn People Search
-        app_key_name1='app1'
-        app1 = App(key_name=app_key_name1, client=client1, app_id='163185560402939', 
-                   api_key='807c2277abe596cfe542927858105306', 
-                   app_secret='aae6abb4d6bf0b41f066c387ab36e486',
-                   name = 'ClickIn People Search', 
-                   domain=db.Link("http://app1.client1.click-in.appspot.com/"))
-        app1.put()
-        
-        #Click In People Search 2
-        app_key_name2='app2'
-        app2 = App(key_name=app_key_name2, client=client1, app_id='114549068628127', 
-                   api_key='7f15ffb2b72ff6c4a6d08daebca21a52', 
-                   app_secret='61545bcd8a3d9fc6a8107eaed5cbe4de',
-                   name = 'ClickIn People Search 2', 
-                   domain=db.Link("http://app2.client1.click-in.appspot.com/"))
-        app2.put()
-        
-        #Cool Running App
-        app_key_name3='app3'
-        app3 = App(key_name=app_key_name3, client=client2, app_id='107411582680918', 
-                   api_key='7a55f39fb4e0371aad78e1bd8dd517af', 
-                   app_secret='c12b89b5f815cebe27636cd8c50a6264',
-                   name = 'Cool Running App', 
-                   domain=db.Link("http://app1.client2.click-in.appspot.com/"))
-
-        app3.put()      
-
-class Client1SearchHandler(BaseClientHandler):
-    def get(self):
-        admin2 = Client_User.get_by_key_name('admin05')
-        apps = admin2.client.apps
-        self.render(u'select_app_to_search', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)        
-                
-class Client2Handler(BaseClientHandler):
-    def get(self):
-        admin2 = Client_User.get_by_key_name('admin05')
-        apps = admin2.client.apps
-        self.render(u'app_mngt', admin=admin2, admin_key=admin2.key().id_or_name(), apps=apps)
-       
 class StartHandler(BaseClientHandler):
     def post(self):
-        #self.response.out.write("Admin ID: " + self.request.get("admin") + "<br />\n")
-        #self.response.out.write("Admin's App ID: " + self.request.get("app") + "<br />\n")
         app_id = self.request.get("app")
         apps = App.all()
         apps.filter('app_id =', app_id)
@@ -288,10 +201,6 @@ class SearchHandler(BaseClientHandler):
                     self.render(u'search_results', users=None, query=query)                
             else:
                 self.render(u'search_form', app_id=app_id)
-
-        #app_id = cgi.escape(self.request.get("app"))
-        #encoded_app_id = base64.b64encode(app_id)
-        
         
     def search(self, app_id, query):
         #case-insensitive matching
@@ -333,7 +242,8 @@ clients = {
     (r"/post_messages", PostMessagesHandler),
     (r"/post_a_message", Post_A_Message), 
     (r"/tasks/monitor", OnlinePresenceMonitor),
-    (r"/search", SearchHandler)])
+    (r"/search", SearchHandler),
+    (r"/", MasterHandler)])
 }
 
 def main():
@@ -341,41 +251,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-def set_cookie(response, name, value, domain=None, path="/", expires=None, secret=""):
-    """Generates and signs a cookie for the give name/value"""
-    timestamp = str(int(time.time()))
-    value = base64.b64encode(value)
-    signature = cookie_signature(secret, value, timestamp)
-    cookie = Cookie.BaseCookie()
-    cookie[name] = "|".join([value, timestamp, signature])
-    cookie[name]["path"] = path
-    if domain: cookie[name]["domain"] = domain
-    if expires:
-        cookie[name]["expires"] = email.utils.formatdate(
-            expires, localtime=False, usegmt=True)
-    response.headers._headers.append(("Set-Cookie", cookie.output()[12:]))
-
-def cookie_signature(secret, *parts):
-    """Generates a cookie signature.
-
-    We use the Facebook app 'secret' since it is different for every app (so
-    people using this example don't accidentally all use the same secret).
-    """
-    hash = hmac.new(secret, digestmod=hashlib.sha1)
-    for part in parts: hash.update(part)
-    return hash.hexdigest()
-
-def check_online_presence(user):
-    format="JSON"
-    query="SELECT online_presence FROM user WHERE uid=" + user.id
-    access_token=user.access_token
-    query_url="https://api.facebook.com/method/fql.query?"
-    full_thing = query_url + urllib.urlencode(dict(query=query, format=format, access_token=access_token))
-    result = json.load(urllib2.urlopen(full_thing))
-    online_presence=None
-    if len(result)==1:
-        online_presence=result[0]['online_presence']            
-    return online_presence
     
-

@@ -15,7 +15,6 @@ class Client_User(db.Model):
     email = db.EmailProperty()
     created = db.DateTimeProperty(required=True, auto_now_add=True)
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
-    #password = db.StringProperty(required=True)
     
 class App(db.Model):
     client = db.ReferenceProperty(Client, collection_name='apps')
