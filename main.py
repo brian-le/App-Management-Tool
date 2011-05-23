@@ -10,6 +10,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 from google.appengine.api import taskqueue
+from google.appengine.api import users
 
 from utils.base import BaseClientHandler
 from utils.cookies import set_cookie
@@ -17,23 +18,48 @@ from utils.facebook import check_online_presence
 from models import App
 from models import App_User
 from models import MonitoredUser
+from models import Client_User
 from clients.client1 import Client1Handler
 from clients.client1 import Client1SearchHandler
 from clients.client2 import Client2Handler
 
-
 class MasterHandler(BaseClientHandler):
     def get(self):
-        self.response.out.write("<center><b>Page under construction. Please check back later!</b></center>")
+        authorized = False
+        user = users.get_current_user()
+        if user:
+            query = db.Query(Client_User)
+            email = user.nickname()
+            if email.find("@") < 0:
+                email = user.email()            
+            query.filter('email =', email)
+            admin = query.get()
+            if admin:
+                admin.put()
+                authorized = True
+                apps = admin.client.apps
+                self.render(u'select_app_to_ask_permissions', admin=admin, apps=apps)
         
-class StartHandler(BaseClientHandler):
-    def post(self):
+        if not authorized:
+            self.response.out.write("Not authorized to access <b>Facebook Apps Management Tool.</b><p><p>")
+            if user:
+                self.response.out.write("<a href=\"%s\">Sign out</a>" % users.create_logout_url("/"))
+            else:
+                self.response.out.write("<a href=\"%s\">Sign in</a>" % users.create_login_url("/"))
+                
+class SelectPermissionsHandler(BaseClientHandler):
+    def get(self):
+        app_id = cgi.escape(self.request.get("app"))
+        self.redirect("/ask_permissions?app=" + app_id)
+
+class AskPermissionsHandler(BaseClientHandler):
+    def get(self):
         app_id = self.request.get("app")
         apps = App.all()
         apps.filter('app_id =', app_id)
         app = apps.get()
         self.render(u'permissions', app=app)
-        
+
 class PermissionsHandler(BaseClientHandler):
     def post(self):
         #self.response.out.write("Permissions handler is coming...")
@@ -225,17 +251,18 @@ class SearchHandler(BaseClientHandler):
 
  
 clients = {
-  'client1.click-in.appspot.com': webapp.WSGIApplication([
+  'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
     ('/', Client1Handler),
     (r"/search", Client1SearchHandler),
     ('/(.*)', Client1Handler)]),
            
-  'client2.click-in.appspot.com': webapp.WSGIApplication([
+  'client2.clickin-tech.appspot.com': webapp.WSGIApplication([
     ('/', Client2Handler),
     ('/(.*)', Client2Handler)]),
            
-  'click-in.appspot.com': webapp.WSGIApplication([
-    (r"/start", StartHandler),
+  'clickin-tech.appspot.com': webapp.WSGIApplication([
+    (r"/select_permissions", SelectPermissionsHandler),
+    (r"/ask_permissions", AskPermissionsHandler),
     (r"/permissions", PermissionsHandler),
     (r"/gettoken", GetAccessTokenHandler),
     (r"/show_users", ShowSelectedUsersHandler),
