@@ -249,7 +249,6 @@ class SearchHandler(BaseClientHandler):
                         
         return results
 
- 
 clients = {
   'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
     ('/', Client1Handler),
