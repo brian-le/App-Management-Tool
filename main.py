@@ -15,38 +15,78 @@ from google.appengine.api import users
 from utils.base import BaseClientHandler
 from utils.cookies import set_cookie
 from utils.facebook import check_online_presence
+from utils.authorization import authorizedAdminClient
+
 from models import App
 from models import App_User
 from models import MonitoredUser
-from models import Client_User
+from models import TimeZone
 from clients.client1 import Client1Handler
 from clients.client1 import Client1SearchHandler
 from clients.client2 import Client2Handler
 
 class MasterHandler(BaseClientHandler):
     def get(self):
-        authorized = False
-        user = users.get_current_user()
-        if user:
-            query = db.Query(Client_User)
-            email = user.nickname()
-            if email.find("@") < 0:
-                email = user.email()            
-            query.filter('email =', email)
-            admin = query.get()
-            if admin:
-                admin.put()
-                authorized = True
-                apps = admin.client.apps
-                self.render(u'select_app_to_ask_permissions', admin=admin, apps=apps)
+        admin = authorizedAdminClient()
+        if admin:
+            self.render(u'admin_menu')
+        else:
+            self.render(u'unauthorized', user=users.get_current_user(), 
+                        login_url=users.create_login_url("/"), 
+                        logout_url=users.create_logout_url("/"))
         
-        if not authorized:
-            self.response.out.write("Not authorized to access <b>Facebook Apps Management Tool.</b><p><p>")
-            if user:
-                self.response.out.write("<a href=\"%s\">Sign out</a>" % users.create_logout_url("/"))
-            else:
-                self.response.out.write("<a href=\"%s\">Sign in</a>" % users.create_login_url("/"))
-                
+class SelectAppHandler(BaseClientHandler):
+    def get(self):
+        admin = authorizedAdminClient()
+        if admin:
+            apps = admin.client.apps
+            self.render(u'select_app_to_search', admin=admin, apps=apps)
+        else:
+            self.render(u'unauthorized', user=users.get_current_user(), 
+                        login_url=users.create_login_url("/"), 
+                        logout_url=users.create_logout_url("/"))
+    
+class AdminAccountManager(BaseClientHandler):
+    def get(self):
+        allTimeZones = TimeZone.all().order('offset')
+
+        timezones = []
+        
+        class Tz:
+            pass
+        
+        from utils.timezone import pretty_print
+        for timezone in allTimeZones:
+            tz = Tz()
+            tz.id = timezone.key().id_or_name()
+            description = pretty_print(timezone)
+            tz.description = description 
+            timezones.append(tz)
+        
+        admin = authorizedAdminClient()
+        if admin:
+            self.render(u'admin_update_page', admin=admin, timezones=timezones)
+        else:
+            self.render(u'unauthorized', user=users.get_current_user(), 
+                        login_url=users.create_login_url("/"), 
+                        logout_url=users.create_logout_url("/"))
+
+class SaveAccountHandler(BaseClientHandler):
+    def post(self):
+        timezone = cgi.escape(self.request.get("timezone"))
+        
+        self.response.out.write("Time zone ID: " + timezone)
+        
+        zones = TimeZone.all()
+        zones.filter('description =', timezone)
+        zone = zones.get()
+
+        if zone:
+            self.response.out.write("In the zone: " + zone.description)
+        else:
+            self.response.out.write("No zone.")
+        
+    
 class SelectPermissionsHandler(BaseClientHandler):
     def get(self):
         app_id = cgi.escape(self.request.get("app"))
@@ -249,6 +289,12 @@ class SearchHandler(BaseClientHandler):
                         
         return results
 
+class PopulateDatabase(BaseClientHandler):
+    def get(self):
+        from utils.datastore import populate_timezone
+        populate_timezone()
+        self.response.out.write("Timezones populated.")
+
 clients = {
   'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
     ('/', Client1Handler),
@@ -269,6 +315,11 @@ clients = {
     (r"/post_a_message", Post_A_Message), 
     (r"/tasks/monitor", OnlinePresenceMonitor),
     (r"/search", SearchHandler),
+    (r"/select_app", SelectAppHandler),
+    (r"/account", AdminAccountManager),
+    (r"/save_account", SaveAccountHandler),
+    
+    #(r"/populate", PopulateDatabase),
     (r"/", MasterHandler)])
 }
 

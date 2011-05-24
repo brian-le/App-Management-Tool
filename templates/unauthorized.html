@@ -1,0 +1,15 @@
+<html>
+  <head>
+  	<title>Unauthorized Access</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css" />
+  </head>
+  <body>
+  	Not authorized to access <b>Facebook Apps Management Tool.</b>
+	<p><p>
+  	{% if user %}
+    	<a href="{{ logout_url }}">Sign out</a>
+    {% else %}
+    	<a href="{{ login_url }}">Sign in</a>
+	{% endif %}
+  </body>
+</html>

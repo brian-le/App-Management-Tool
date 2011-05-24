@@ -1,5 +1,11 @@
 from google.appengine.ext import db
 
+class TimeZone(db.Model):
+    description = db.StringProperty(required=True)
+    offset = db.FloatProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    lastUpdate = db.DateTimeProperty(auto_now=True)
+
 class Client(db.Model):
     id = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
@@ -13,6 +19,7 @@ class Client_User(db.Model):
     id = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
     email = db.EmailProperty()
+    timezone = db.ReferenceProperty(TimeZone)
     created = db.DateTimeProperty(required=True, auto_now_add=True)
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
     
@@ -42,3 +49,4 @@ class MonitoredUser(db.Model):
     message = db.StringProperty()
     access_token = db.StringProperty(required=True)
     time_to_post = db.DateTimeProperty(default=None)
+    

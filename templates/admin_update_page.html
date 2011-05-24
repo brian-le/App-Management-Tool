@@ -1,0 +1,31 @@
+<html>
+  <head>
+  	<title>Admin Account Management</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css" />
+  </head>
+  <body>
+  	<h3>Admin Account Management</h3>
+	<div>
+		<h4>Admin User</h4>
+			<b>Name:</b> {{ admin.name }}<br />
+			<b>Email:</b> {{ admin.email }}<br />
+			<b>Last Login:</b> {{ admin.last_modified }}<br />
+	</div>
+
+  	<form action="http://clickin-tech.appspot.com/save_account" method="post">
+		<div>
+			<h3>Select Timezone</h3>
+			<select name="timezone">
+				{% for timezone in timezones %}
+					<option value="{{ timezone.description }}"> {{ timezone.description }}</option>
+				{% endfor %}
+			</select>
+			<br /><br />
+			<div>
+			<input type="submit" value="Save" />
+			</div>
+    	</div>
+    </form> 
+  </body>
+</html>
+	

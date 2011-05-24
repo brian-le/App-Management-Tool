@@ -9,6 +9,73 @@ from models import Client
 from models import Client_User
 from models import App
 
+def populate_timezone():
+    #Source: http://forums.asp.net/p/1518462/3641104.aspx
+    time_zones = [(0, 'Casablanca'),
+                  (0, 'Coordinated Universal Time'),
+                  (0, 'Dublin, Edinburgh, Lisbon, London'),
+                  (0, 'Monrovia, Reykjavik'),
+                  (1, 'Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna'),
+                  (1, 'Belgrade, Bratislava, Budapest, Ljubljana, Prague'),
+                  (1, 'Brussels, Copenhagen, Madrid, Paris'),
+                  (1, 'Sarajevo, Skopje, Warsaw, Zagreb'),
+                  (1, 'West Central Africa'),
+                  (2, 'Amman, Athens, Bucharest, Istanbul'),
+                  (2, 'Beirut, Cairo, Harare, Pretoria'),
+                  (2, 'Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius'),
+                  (2, 'Jerusalem, Minsk, Windhoek'),
+                  (3, 'Baghdad, Kuwait, Riyadh, Nairobi'),
+                  (3, 'Moscow, St. Petersburg, Volgograd'),
+                  (4, 'Abu Dhabi, Muscat', 'Baku'),
+                  (4, 'Port Louis', 'Tbilisi', 'Yerevan'),
+                  (4.5, 'Kabul'),
+                  (5, 'Islamabad, Karachi, Tashkent'),
+                  (5.5, 'Chennai, Kolkata, Mumbai, New Delhi'),
+                  (5.5, 'Sri Jayawardenepura'),
+                  (5.75, 'Kathmandu'),
+                  (6.0, 'Astana, Dhaka, Novosibirsk'),
+                  (6.5, 'Yangon (Rangoon)'),
+                  (7, 'Bangkok, Hanoi, Jakarta, Krasnoyarsk'),
+                  (8, 'Beijing, Chongqing, Hong Kong, Urumqi'),
+                  (8, 'Kuala Lumpur, Singapore, Taipei'),
+                  (8, 'Perth, Ulaanbaatar'),
+                  (9, 'Osaka, Sapporo, Tokyo, Seoul'),
+                  (9.5, 'Adelaide, Darwin'),
+                  (10, 'Brisbane, Canberra, Melbourne, Sydney'),
+                  (10, 'Guam, Port Moresby, Hobart, Vladivostok'),
+                  (11, 'Magadan, Solomon Is., New Caledonia'),
+                  (12, 'Auckland, Wellington'),
+                  (12, 'Fiji, Marshall Is., Petropavlovsk-Kamchatsky'),
+                  (13, 'Nukualofa'),
+                  (-1, 'Azores, Cape Verde Is.'),
+                  (-2, 'Mid-Atlantic'),
+                  (-3, 'Brasilia, Buenos Aires'),
+                  (-3, 'Cayenne, Greenland, Montevideo'),
+                  (-3.5, 'Newfoundland'),
+                  (-4, 'Asuncion, Georgetown, La Paz, San Juan'),
+                  (-4, 'Atlantic Time (Canada)'),
+                  (-4, 'Manaus, Santiago'),
+                  (-4.5, 'Caracas'),
+                  (-5, 'Bogota, Lima, Quito'),
+                  (-5, 'Eastern Time (US & Canada)'),
+                  (-6, 'Central Time (US & Canada)'),
+                  (-6, 'Guadalajara, Mexico City, Monterrey'),
+                  (-6, 'Saskatchewan'),
+                  (-7, 'Arizona'),
+                  (-7, 'Chihuahua, La Paz, Mazatlan'),
+                  (-7, 'Mountain Time (US & Canada)'),
+                  (-8, 'Pacific Time (US & Canada)'),
+                  (-8, 'Tijuana, Baja California'),
+                  (-9, 'Alaska'),
+                  (-10, 'Hawaii'),
+                  (-11, 'Midway Island, Samoa'),
+                  (-12, 'International Date Line West')]
+    
+    from models import TimeZone
+    for timezone in time_zones:
+        entry = TimeZone(offset=float(timezone[0]), description=timezone[1])
+        entry.put()
+    
 def populate_datastore():
     client_key_name1='client01'
     client1 = Client(key_name=client_key_name1, id='12345678', name='Organic Oranges LLC', domain=db.Link("http://client1.clickin-tech.appspot.com"))
