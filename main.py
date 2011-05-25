@@ -175,9 +175,14 @@ class ShowSelectedUsersHandler(BaseClientHandler):
         encoded_app_id = self.request.get("app_id")
         app_id = base64.b64decode(encoded_app_id)
         selected_users = db.Query(App_User).filter('app_id =', app_id)
-        app = db.Query(App).filter("app_id =", app_id).get()                    
-        self.render(u'message_posting_form', app=app, users=selected_users, date_range=range(1, 32), year_range=range(2011, 2021), 
-                    hour_range=range(24), minute_range=range(60))
+        app = db.Query(App).filter("app_id =", app_id).get()
+        admin = authorizedAdminClient()
+        from utils.timezone import pretty_print
+        self.render(u'message_posting_form', app=app, users=selected_users, 
+                    date_range=range(1, 32), year_range=range(2011, 2021), 
+                    hour_range=range(24), minute_range=range(60), 
+                    timezone_description = pretty_print(admin.timezone),
+                    timezone = admin.timezone.offset)
         
 class PostMessagesHandler(BaseClientHandler):
     def post(self):
@@ -185,6 +190,9 @@ class PostMessagesHandler(BaseClientHandler):
         message = cgi.escape(self.request.get("message"))
         selected_user_ids = self.request.get_all("selected_users")
         selected_users = db.Query(App_User).filter("app_id =", app_id).filter("id IN ", selected_user_ids)
+        timezone = cgi.escape(self.request.get("timezone"))
+        timezone = float(timezone)
+        timedelta = datetime.timedelta(hours=-timezone)
         
         schedule = self.request.get_all("schedule")
         time_to_post=None
@@ -195,6 +203,7 @@ class PostMessagesHandler(BaseClientHandler):
             hour=int(cgi.escape(self.request.get("hour")))
             minute=int(cgi.escape(self.request.get("minute")))
             time_to_post=datetime.datetime(year, month, date, hour, minute)
+            time_to_post = time_to_post + timedelta
            
             if len(schedule)==1: #if only scheduled posting was chosen
                 self.schedule_a_post(app_id, selected_users, time_to_post, message)             

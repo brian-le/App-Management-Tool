@@ -32,8 +32,8 @@
 		<em>Schedule time to post</em> <br />
 		<input type="checkbox" name="schedule" value="gets_online" /> When user gets online <br />
 		<input type="checkbox" name="schedule" value="changes_status" /> When user changes status <br />
-		<input type="checkbox" name="schedule" value="later" checked="checked"/> At the following time (GMT) <br />
-		
+		<input type="checkbox" name="schedule" value="later" checked="checked"/> At the following time {{ timezone_description }} <br />
+		<input type="hidden"  name="timezone" value="{{ timezone }}"/>		
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Month 
 		<select name="month">
 			<option value="1">January</option>
