@@ -40,18 +40,32 @@ class SelectAppHandler(BaseClientHandler):
         admin = authorizedAdminClient()
         if admin:
             apps = admin.client.apps
-            self.render(u'select_app_to_search', admin=admin, apps=apps)
+            self.render(u'select_app', admin=admin, apps=apps)
         else:
             self.render(u'unauthorized', user=users.get_current_user(), 
                         login_url=users.create_login_url("/"), 
                         logout_url=users.create_logout_url("/"))
+
+class AppMenuHandler(BaseClientHandler):
+    def get(self):
+        admin = authorizedAdminClient()
+        if admin:
+            app_id = cgi.escape(self.request.get("app"))
+            encoded_app_id = base64.b64encode(app_id)
+            apps = App.all()
+            apps.filter('app_id =', app_id)
+            app = apps.get()
+            self.render(u'app_menu', app=app, encoded_app_id=encoded_app_id)
+        else:
+            self.render(u'unauthorized', user=users.get_current_user(), 
+                        login_url=users.create_login_url("/"), 
+                        logout_url=users.create_logout_url("/"))
+
     
 class AdminAccountManager(BaseClientHandler):
     def get(self):
         allTimeZones = TimeZone.all().order('offset')
-
         timezones = []
-        
         class Tz:
             pass
         
@@ -73,18 +87,18 @@ class AdminAccountManager(BaseClientHandler):
 
 class SaveAccountHandler(BaseClientHandler):
     def post(self):
-        timezone = cgi.escape(self.request.get("timezone"))
-        
-        self.response.out.write("Time zone ID: " + timezone)
-        
-        zones = TimeZone.all()
-        zones.filter('description =', timezone)
-        zone = zones.get()
-
-        if zone:
-            self.response.out.write("In the zone: " + zone.description)
+        timezone_id = cgi.escape(self.request.get("timezone"))
+        timezone = TimeZone.get_by_id(long(timezone_id))
+        admin = authorizedAdminClient()
+        if admin:
+            admin.timezone = timezone
+            admin.put()
+            self.response.out.write("Saved changes for admin %s. Time zone is now %s." % 
+                                    (admin.name, timezone.description))
         else:
-            self.response.out.write("No zone.")
+            self.render(u'unauthorized', user=users.get_current_user(), 
+                        login_url=users.create_login_url("/"), 
+                        logout_url=users.create_logout_url("/"))
         
     
 class SelectPermissionsHandler(BaseClientHandler):
@@ -162,7 +176,7 @@ class ShowSelectedUsersHandler(BaseClientHandler):
         app_id = base64.b64decode(encoded_app_id)
         selected_users = db.Query(App_User).filter('app_id =', app_id)
         app = db.Query(App).filter("app_id =", app_id).get()                    
-        self.render(u'message_form', app=app, users=selected_users, date_range=range(1, 32), year_range=range(2011, 2021), 
+        self.render(u'message_posting_form', app=app, users=selected_users, date_range=range(1, 32), year_range=range(2011, 2021), 
                     hour_range=range(24), minute_range=range(60))
         
 class PostMessagesHandler(BaseClientHandler):
@@ -297,13 +311,15 @@ class PopulateDatabase(BaseClientHandler):
 
 clients = {
   'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
-    ('/', Client1Handler),
-    (r"/search", Client1SearchHandler),
-    ('/(.*)', Client1Handler)]),
+    ('/', MasterHandler),
+    #(r"/search", Client1SearchHandler),
+    #('/(.*)', Client1Handler)
+    ]),
            
   'client2.clickin-tech.appspot.com': webapp.WSGIApplication([
-    ('/', Client2Handler),
-    ('/(.*)', Client2Handler)]),
+    ('/', MasterHandler),
+    #('/(.*)', Client2Handler)
+    ]),
            
   'clickin-tech.appspot.com': webapp.WSGIApplication([
     (r"/select_permissions", SelectPermissionsHandler),
@@ -316,9 +332,9 @@ clients = {
     (r"/tasks/monitor", OnlinePresenceMonitor),
     (r"/search", SearchHandler),
     (r"/select_app", SelectAppHandler),
+    (r"/app_menu", AppMenuHandler),
     (r"/account", AdminAccountManager),
     (r"/save_account", SaveAccountHandler),
-    
     #(r"/populate", PopulateDatabase),
     (r"/", MasterHandler)])
 }

@@ -17,7 +17,7 @@
 			<h3>Select Timezone</h3>
 			<select name="timezone">
 				{% for timezone in timezones %}
-					<option value="{{ timezone.description }}"> {{ timezone.description }}</option>
+					<option value="{{ timezone.id }}"> {{ timezone.description }}</option>
 				{% endfor %}
 			</select>
 			<br /><br />
