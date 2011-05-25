@@ -187,7 +187,7 @@ class ShowSelectedUsersHandler(BaseClientHandler):
 class PostMessagesHandler(BaseClientHandler):
     def post(self):
         app_id = self.request.get("app_id")
-        message = cgi.escape(self.request.get("message"))
+        message = self.request.get("message")
         selected_user_ids = self.request.get_all("selected_users")
         selected_users = db.Query(App_User).filter("app_id =", app_id).filter("id IN ", selected_user_ids)
         timezone = cgi.escape(self.request.get("timezone"))
