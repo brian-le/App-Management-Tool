@@ -21,12 +21,10 @@ from models import App
 from models import App_User
 from models import MonitoredUser
 from models import TimeZone
-from clients.client1 import Client1Handler
-from clients.client1 import Client1SearchHandler
-from clients.client2 import Client2Handler
 
 class MasterHandler(BaseClientHandler):
     def get(self):
+        
         admin = authorizedAdminClient()
         if admin:
             self.render(u'admin_menu')
@@ -318,9 +316,13 @@ class PopulateDatabase(BaseClientHandler):
         populate_timezone()
         self.response.out.write("Timezones populated.")
 
+from clients.client1 import Client1Handler
+from clients.client1 import SaveUserPermissionsHandler
+
 clients = {
   'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
-    ('/', MasterHandler),
+    ('/', Client1Handler),
+    ('/allow', SaveUserPermissionsHandler),
     #(r"/search", Client1SearchHandler),
     #('/(.*)', Client1Handler)
     ]),
