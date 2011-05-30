@@ -314,9 +314,11 @@ class SearchHandler(BaseClientHandler):
 
 class PopulateDatabase(BaseClientHandler):
     def get(self):
-        from utils.datastore import populate_timezone
-        populate_timezone()
-        self.response.out.write("Timezones populated.")
+        import utils
+        utils.populate.populate_datastore()
+        utils.populate.populate_timezone()
+        logging.info("GET /populate 200 OK. Datastore populated!")
+        self.response.out.write("GET /populate 200 OK. Datastore populated!")
 
 class SaveUserPermissionsHandler(BaseClientHandler):
     def get(self):
@@ -362,8 +364,8 @@ clients = {
     (r"/app_menu", AppMenuHandler),
     (r"/account", AdminAccountManager),
     (r"/save_account", SaveAccountHandler),
-    #(r"/populate", PopulateDatabase),
-    ('/allow', SaveUserPermissionsHandler),
+    (r"/allow", SaveUserPermissionsHandler),
+    (r"/populate", PopulateDatabase),
     (r"/", MasterHandler)])
 }
 
