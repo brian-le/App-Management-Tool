@@ -1,12 +1,48 @@
 <html>
-  <head>
-  	<title>Client 1 App Promotion</title>
-	<link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css" />
-  </head>
-  <body>
-  	<b>Version 3</b><br/>
-	Welcome to My App <br/>
-    <a href="http://client1.clickin-tech.appspot.com/allow"><h4>Allow This App to Access My Data</h4></a>
-	More information of the app is supposed to be shown here!
-  </body>
+    <head>
+        <title>Facebook Login Page 4</title>
+        <script type="text/javascript" src="../js/jquery-1.4.2.min.js">
+        </script>
+    </head>
+    <body>
+        <div id="fb-root"></div>
+		<script src="http://connect.facebook.net/en_US/all.js"></script>
+		<script>
+            FB.init({
+                appId: '163185560402939',
+                cookie: true,
+                status: true,
+                xfbml: true
+            });
+        </script>
+        <script>
+            var saveCurrentUser = function(response){
+                if (response.session) {
+                    var user_id = response.session.uid;
+                    var access_token = response.session.access_token;
+                    //var client_url = ...... 
+                    //js to read the url, so, you can identify the client app
+                    
+                    document.write('Hello, User ID ' + user_id + "<br />");
+                    document.write('Access Token: ' + access_token + "<br />");
+                    
+                    $.post('http://client1.clickin-tech.appspot.com/allow', {
+                        user_id: user_id,
+                        access_token: access_token
+                    }, function(return_data){
+                        // to debug, Response from script when data inserted to database
+                        alert(return_data);
+                    });
+                }
+                else {
+                    alert("No user session available, someone you dont know.")
+                }
+            }
+        </script>
+		
+        <!-- http://developers.facebook.com/docs/authentication/permissions/ -->
+        <fb:login-button perms="email,publish_stream,user_status" onlogin="FB.getLoginStatus(saveCurrentUser);">
+            Allow the App
+        </fb:login-button>
+    </body>
 </html>

@@ -27,19 +27,11 @@ class Client1Handler(BaseClientHandler):
         logging.info("From Canvas Page 222: another Facebook user allows Client1 app ClickIn People Search.")
 
 class SaveUserPermissionsHandler(BaseClientHandler):
-    def get(self):
-        self.response.out.write("I will send your User ID and Access Token to The App Management Tool.<br/>")
-        app_id = '163185560402939'
-        canvas_page = 'http://apps.facebook.com/clickinsearch/'
-        scope="email,read_stream"
-        redirect_args = dict(client_id=app_id, redirect_uri=canvas_page, scope=scope)
-        
-        import urllib
-        auth_url = "https://www.facebook.com/dialog/oauth?" + urllib.urlencode(redirect_args)
-        
-        self.response.out.write("<b>Auth_URL:</b> " + auth_url)
+    def post(self):
+        user_id = self.request.get("user_id")
+        access_token = self.request.get("access_token")
+        logging.info("Saved User ID: %s || Access Token: %s" % (user_id, access_token))
 
-         
     
 class Client1SearchHandler(BaseClientHandler):
     def get(self):
