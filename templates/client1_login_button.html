@@ -1,8 +1,8 @@
 <html>
     <head>
         <title>Facebook Login Page 9</title>
-        <script type="text/javascript" src="../js/jquery-1.4.2.min.js">
-        </script>
+        <script type="text/javascript" src="../js/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="../js/constants.js"></script>
     </head>
     <body>
         <div id="fb-root"></div>
@@ -24,7 +24,7 @@
 					document.write('<b>App ID:</b> ' + app_id + "<br />");
                     document.write('<b>Hey, User ID </b> ' + user_id + "<br />");
                     document.write('<b>Access Token:</b> ' + access_token + "<br />");
-                    $.post('http://clickin-tech.appspot.com/allow', {
+                    $.post(__SITE_DOMAIN__ + '/allow', {
 						app_id: app_id,
                         user_id: user_id,
                         access_token: access_token

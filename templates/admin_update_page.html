@@ -12,7 +12,7 @@
 			<b>Last Login:</b> {{ admin.last_modified }}<br />
 	</div>
 
-  	<form action="http://clickin-tech.appspot.com/save_account" method="post">
+  	<form action="{{ protocol }}{{ siteDomain }}/save_account" method="post">
 		<div>
 			<h3>Select Timezone</h3>
 			<select name="timezone">

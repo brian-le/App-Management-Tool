@@ -4,7 +4,7 @@
   </head>
   <body>
 	<h3>Facebook App Selection</h3>
-	<form action="http://clickin-tech.appspot.com/app_menu" method="get">
+	<form action="{{ protocol }}{{ siteDomain }}/app_menu" method="get">
 		<div>
 			<b>Name:</b> {{ admin.name }}<br />
 			<b>Email:</b> {{ admin.email }}<br />

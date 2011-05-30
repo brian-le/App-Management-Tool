@@ -24,12 +24,15 @@ from models import TimeZone
 
 from clients.client1 import Client1Handler
 
+from _globalConfiguration_ import __PROTOCOL__
+from _globalConfiguration_ import __SITE_DOMAIN__
+
 class MasterHandler(BaseClientHandler):
     def get(self):
         
         admin = authorizedAdminClient()
         if admin:
-            self.render(u'admin_menu')
+            self.render(u'admin_menu', protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
         else:
             self.render(u'unauthorized', user=users.get_current_user(),
                         login_url=users.create_login_url("/"),
@@ -40,7 +43,8 @@ class SelectAppHandler(BaseClientHandler):
         admin = authorizedAdminClient()
         if admin:
             apps = admin.client.apps
-            self.render(u'select_app', admin=admin, apps=apps)
+            self.render(u'select_app', admin=admin, apps=apps,
+                        protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
         else:
             self.render(u'unauthorized', user=users.get_current_user(),
                         login_url=users.create_login_url("/"),
@@ -55,7 +59,8 @@ class AppMenuHandler(BaseClientHandler):
             apps = App.all()
             apps.filter('app_id =', app_id)
             app = apps.get()
-            self.render(u'app_menu', app=app, encoded_app_id=encoded_app_id)
+            self.render(u'app_menu', app=app, encoded_app_id=encoded_app_id,
+                        protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
         else:
             self.render(u'unauthorized', user=users.get_current_user(),
                         login_url=users.create_login_url("/"),
@@ -79,7 +84,8 @@ class AdminAccountManager(BaseClientHandler):
         
         admin = authorizedAdminClient()
         if admin:
-            self.render(u'admin_update_page', admin=admin, timezones=timezones)
+            self.render(u'admin_update_page', admin=admin, timezones=timezones,
+                        protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
         else:
             self.render(u'unauthorized', user=users.get_current_user(),
                         login_url=users.create_login_url("/"),
@@ -112,7 +118,8 @@ class AskPermissionsHandler(BaseClientHandler):
         apps = App.all()
         apps.filter('app_id =', app_id)
         app = apps.get()
-        self.render(u'permissions', app=app)
+        self.render(u'permissions', app=app, 
+                    protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__ )
 
 class PermissionsHandler(BaseClientHandler):
     def post(self):
@@ -182,7 +189,8 @@ class ShowSelectedUsersHandler(BaseClientHandler):
                     date_range=range(1, 32), year_range=range(2011, 2021),
                     hour_range=range(24), minute_range=range(60),
                     timezone_description=pretty_print(admin.timezone),
-                    timezone=admin.timezone.offset)
+                    timezone=admin.timezone.offset,
+                    protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
         
 class PostMessagesHandler(BaseClientHandler):
     def post(self):
@@ -314,7 +322,7 @@ class SearchHandler(BaseClientHandler):
 
 class PopulateDatabase(BaseClientHandler):
     def get(self):
-        import utils
+        import utils.populate
         utils.populate.populate_datastore()
         utils.populate.populate_timezone()
         logging.info("GET /populate 200 OK. Datastore populated!")
@@ -339,18 +347,16 @@ class SaveUserPermissionsHandler(BaseClientHandler):
                         profile_url=profile["link"], token_status="Active")
         user.put()
 
-
 clients = {
-  'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
+  'client1.' + __SITE_DOMAIN__: webapp.WSGIApplication([
     ('/', Client1Handler)
     ]),
            
-  'client2.clickin-tech.appspot.com': webapp.WSGIApplication([
-    ('/', MasterHandler),
-    #('/(.*)', Client2Handler)
+  'client2.' + __SITE_DOMAIN__: webapp.WSGIApplication([
+    ('/', MasterHandler)
     ]),
            
-  'clickin-tech.appspot.com': webapp.WSGIApplication([
+  __SITE_DOMAIN__: webapp.WSGIApplication([
     (r"/select_permissions", SelectPermissionsHandler),
     (r"/ask_permissions", AskPermissionsHandler),
     (r"/permissions", PermissionsHandler),
@@ -365,7 +371,7 @@ clients = {
     (r"/account", AdminAccountManager),
     (r"/save_account", SaveAccountHandler),
     (r"/allow", SaveUserPermissionsHandler),
-    (r"/populate", PopulateDatabase),
+    #(r"/populate", PopulateDatabase),
     (r"/", MasterHandler)])
 }
 

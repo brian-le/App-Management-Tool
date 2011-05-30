@@ -20,7 +20,7 @@ class Client1Handler(BaseClientHandler):
         This information is passed to your Canvas URL using HTTP POST within a single signed_request parameter 
         which contains a base64url encoded JSON object.
         '''
-        logging.info("Canvas Page 2: Another Facebook user allows Client1 app ClickIn People Search.")
+        logging.info("Canvas Page: Another Facebook user allows Client1 app ClickIn People Search.")
 
 class Client1SearchHandler(BaseClientHandler):
     def get(self):
