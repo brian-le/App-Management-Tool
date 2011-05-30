@@ -11,6 +11,9 @@ handlers:
 - url: /stylesheets
   static_dir: stylesheets
   
+- url: /js
+  static_dir: js 
+  
 - url: /favicon\.ico
   static_files: static/images/favicon.ico
   upload: static/images/favicon\.ico

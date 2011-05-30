@@ -22,6 +22,8 @@ from models import App_User
 from models import MonitoredUser
 from models import TimeZone
 
+from clients.client1 import Client1Handler
+
 class MasterHandler(BaseClientHandler):
     def get(self):
         
@@ -29,8 +31,8 @@ class MasterHandler(BaseClientHandler):
         if admin:
             self.render(u'admin_menu')
         else:
-            self.render(u'unauthorized', user=users.get_current_user(), 
-                        login_url=users.create_login_url("/"), 
+            self.render(u'unauthorized', user=users.get_current_user(),
+                        login_url=users.create_login_url("/"),
                         logout_url=users.create_logout_url("/"))
         
 class SelectAppHandler(BaseClientHandler):
@@ -40,8 +42,8 @@ class SelectAppHandler(BaseClientHandler):
             apps = admin.client.apps
             self.render(u'select_app', admin=admin, apps=apps)
         else:
-            self.render(u'unauthorized', user=users.get_current_user(), 
-                        login_url=users.create_login_url("/"), 
+            self.render(u'unauthorized', user=users.get_current_user(),
+                        login_url=users.create_login_url("/"),
                         logout_url=users.create_logout_url("/"))
 
 class AppMenuHandler(BaseClientHandler):
@@ -55,8 +57,8 @@ class AppMenuHandler(BaseClientHandler):
             app = apps.get()
             self.render(u'app_menu', app=app, encoded_app_id=encoded_app_id)
         else:
-            self.render(u'unauthorized', user=users.get_current_user(), 
-                        login_url=users.create_login_url("/"), 
+            self.render(u'unauthorized', user=users.get_current_user(),
+                        login_url=users.create_login_url("/"),
                         logout_url=users.create_logout_url("/"))
 
     
@@ -79,8 +81,8 @@ class AdminAccountManager(BaseClientHandler):
         if admin:
             self.render(u'admin_update_page', admin=admin, timezones=timezones)
         else:
-            self.render(u'unauthorized', user=users.get_current_user(), 
-                        login_url=users.create_login_url("/"), 
+            self.render(u'unauthorized', user=users.get_current_user(),
+                        login_url=users.create_login_url("/"),
                         logout_url=users.create_logout_url("/"))
 
 class SaveAccountHandler(BaseClientHandler):
@@ -94,8 +96,8 @@ class SaveAccountHandler(BaseClientHandler):
             self.response.out.write("Saved changes for admin %s. Time zone is now %s." % 
                                     (admin.name, timezone.description))
         else:
-            self.render(u'unauthorized', user=users.get_current_user(), 
-                        login_url=users.create_login_url("/"), 
+            self.render(u'unauthorized', user=users.get_current_user(),
+                        login_url=users.create_login_url("/"),
                         logout_url=users.create_logout_url("/"))
         
     
@@ -124,13 +126,13 @@ class PermissionsHandler(BaseClientHandler):
                     scope.add(value)
                 
         scope.add('offline_access')
-        app_id=cgi.escape(self.request.get("app_id"))
+        app_id = cgi.escape(self.request.get("app_id"))
         args = dict(scope=','.join(scope), app_id=app_id)
         self.redirect("/gettoken?" + urllib.urlencode(args))
             
 class GetAccessTokenHandler(BaseClientHandler):
     def get(self):
-        app_id=self.request.get("app_id")
+        app_id = self.request.get("app_id")
         app_id_args = dict(app_id=app_id)
         redirect_uri = self.request.path_url + "?" + urllib.urlencode(app_id_args)
         args = dict(client_id=app_id, redirect_uri=redirect_uri)
@@ -165,7 +167,7 @@ class GetAccessTokenHandler(BaseClientHandler):
         else:
             scope = cgi.escape(self.request.get("scope"))
             custom_scope = "&scope=" + scope
-            custom_request_url="https://www.facebook.com/dialog/oauth?" + urllib.urlencode(args) + custom_scope
+            custom_request_url = "https://www.facebook.com/dialog/oauth?" + urllib.urlencode(args) + custom_scope
             self.redirect(custom_request_url)
         
 class ShowSelectedUsersHandler(BaseClientHandler):
@@ -176,11 +178,11 @@ class ShowSelectedUsersHandler(BaseClientHandler):
         app = db.Query(App).filter("app_id =", app_id).get()
         admin = authorizedAdminClient()
         from utils.timezone import pretty_print
-        self.render(u'message_posting_form', app=app, users=selected_users, 
-                    date_range=range(1, 32), year_range=range(2011, 2021), 
-                    hour_range=range(24), minute_range=range(60), 
-                    timezone_description = pretty_print(admin.timezone),
-                    timezone = admin.timezone.offset)
+        self.render(u'message_posting_form', app=app, users=selected_users,
+                    date_range=range(1, 32), year_range=range(2011, 2021),
+                    hour_range=range(24), minute_range=range(60),
+                    timezone_description=pretty_print(admin.timezone),
+                    timezone=admin.timezone.offset)
         
 class PostMessagesHandler(BaseClientHandler):
     def post(self):
@@ -190,20 +192,20 @@ class PostMessagesHandler(BaseClientHandler):
         selected_users = db.Query(App_User).filter("app_id =", app_id).filter("id IN ", selected_user_ids)
         timezone = cgi.escape(self.request.get("timezone"))
         timezone = float(timezone)
-        timedelta = datetime.timedelta(hours=-timezone)
+        timedelta = datetime.timedelta(hours= -timezone)
         
         schedule = self.request.get_all("schedule")
-        time_to_post=None
+        time_to_post = None
         if "later" in schedule:
-            month=int(cgi.escape(self.request.get("month")))
-            date=int(cgi.escape(self.request.get("date")))
-            year=int(cgi.escape(self.request.get("year")))
-            hour=int(cgi.escape(self.request.get("hour")))
-            minute=int(cgi.escape(self.request.get("minute")))
-            time_to_post=datetime.datetime(year, month, date, hour, minute)
+            month = int(cgi.escape(self.request.get("month")))
+            date = int(cgi.escape(self.request.get("date")))
+            year = int(cgi.escape(self.request.get("year")))
+            hour = int(cgi.escape(self.request.get("hour")))
+            minute = int(cgi.escape(self.request.get("minute")))
+            time_to_post = datetime.datetime(year, month, date, hour, minute)
             time_to_post = time_to_post + timedelta
            
-            if len(schedule)==1: #if only scheduled posting was chosen
+            if len(schedule) == 1: #if only scheduled posting was chosen
                 self.schedule_a_post(app_id, selected_users, time_to_post, message)             
             
         if ("gets_online" in schedule):
@@ -213,11 +215,11 @@ class PostMessagesHandler(BaseClientHandler):
 
     def monitor_users(self, app_id, users, message, time_to_post=None):
         for user in users:
-            online_presence=check_online_presence(user)
+            online_presence = check_online_presence(user)
             if online_presence is None:
-                online_presence="error" #cannot determine online presence
-            monitor_user = MonitoredUser(app_id=app_id, id=user.id, 
-                                         last_online_presence=online_presence, 
+                online_presence = "error" #cannot determine online presence
+            monitor_user = MonitoredUser(app_id=app_id, id=user.id,
+                                         last_online_presence=online_presence,
                                          message=message, access_token=user.access_token,
                                          time_to_post=time_to_post)
             monitor_user.put()
@@ -225,8 +227,8 @@ class PostMessagesHandler(BaseClientHandler):
     def schedule_a_post(self, app_id, users, time_to_post, message): 
         deferred_queue = taskqueue.Queue(name="deferred-queue")
         for user in users:
-            task = taskqueue.Task(eta=time_to_post, url="/post_a_message", 
-                                  params={'app_id':app_id, 'user_id':user.id, 
+            task = taskqueue.Task(eta=time_to_post, url="/post_a_message",
+                                  params={'app_id':app_id, 'user_id':user.id,
                                           'access_token':user.access_token,
                                           'message':message})
             deferred_queue.add(task)
@@ -246,14 +248,14 @@ class Post_A_Message(webapp.RequestHandler):
 
 class OnlinePresenceMonitor(webapp.RequestHandler):
     def get(self):
-        monitored_users=MonitoredUser.all()
+        monitored_users = MonitoredUser.all()
        
         for user in monitored_users:
-            message=user.message
-            access_token=user.access_token
-            current_online_status=check_online_presence(user)
+            message = user.message
+            access_token = user.access_token
+            current_online_status = check_online_presence(user)
             
-            if (current_online_status=='active'): #active, idle, offline, or error
+            if (current_online_status == 'active'): #active, idle, offline, or error
                 graph = facebook.GraphAPI(access_token)
                 if user.time_to_post:
                     now = datetime.datetime.now()
@@ -316,15 +318,29 @@ class PopulateDatabase(BaseClientHandler):
         populate_timezone()
         self.response.out.write("Timezones populated.")
 
-from clients.client1 import Client1Handler
-from clients.client1 import SaveUserPermissionsHandler
+class SaveUserPermissionsHandler(BaseClientHandler):
+    def get(self):
+        logging.info("GET 200 /allow")
+        
+    def post(self):
+        app_id = self.request.get("app_id")
+        access_token = self.request.get("access_token")
+        
+        logging.info("App ID %s || Access Token: %s" % 
+                      (app_id, access_token))
+        profile = json.load(urllib.urlopen("https://graph.facebook.com/me?" + 
+                                           urllib.urlencode(dict(access_token=access_token))))        
+        user_id = str(profile["id"])
+        key_name = app_id + "_" + user_id
+        user = App_User(key_name=key_name, id=user_id, app_id=app_id,
+                        name=profile["name"], email=profile["email"], access_token=access_token,
+                        profile_url=profile["link"], token_status="Active")
+        user.put()
+
 
 clients = {
   'client1.clickin-tech.appspot.com': webapp.WSGIApplication([
-    ('/', Client1Handler),
-    ('/allow', SaveUserPermissionsHandler),
-    #(r"/search", Client1SearchHandler),
-    #('/(.*)', Client1Handler)
+    ('/', Client1Handler)
     ]),
            
   'client2.clickin-tech.appspot.com': webapp.WSGIApplication([
@@ -339,7 +355,7 @@ clients = {
     (r"/gettoken", GetAccessTokenHandler),
     (r"/show_users", ShowSelectedUsersHandler),
     (r"/post_messages", PostMessagesHandler),
-    (r"/post_a_message", Post_A_Message), 
+    (r"/post_a_message", Post_A_Message),
     (r"/tasks/monitor", OnlinePresenceMonitor),
     (r"/search", SearchHandler),
     (r"/select_app", SelectAppHandler),
@@ -347,6 +363,7 @@ clients = {
     (r"/account", AdminAccountManager),
     (r"/save_account", SaveAccountHandler),
     #(r"/populate", PopulateDatabase),
+    ('/allow', SaveUserPermissionsHandler),
     (r"/", MasterHandler)])
 }
 
