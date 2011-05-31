@@ -342,7 +342,7 @@ class SaveUserPermissionsHandler(BaseClientHandler):
         user_id = str(profile["id"])
         key_name = app_id + "_" + user_id
         user = App_User(key_name=key_name, id=user_id, app_id=app_id,
-                        name=profile["name"], email=profile["email"], access_token=access_token,
+                        name=profile["name"], access_token=access_token,
                         profile_url=profile["link"], token_status="Active")
         user.put()
 
