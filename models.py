@@ -3,15 +3,16 @@ from google.appengine.ext import db
 class TimeZone(db.Model):
     description = db.StringProperty(required=True)
     offset = db.FloatProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    lastUpdate = db.DateTimeProperty(auto_now=True)
+    created = db.DateTimeProperty(required=True, auto_now_add=True)
+    last_modified = db.DateTimeProperty(required=True, auto_now=True)
 
 class Client(db.Model):
     id = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
+    domain = db.LinkProperty(required=True)
     created = db.DateTimeProperty(required=True, auto_now_add=True)
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
-    domain = db.LinkProperty(required=True)
+    
     
 class Client_User(db.Model):
     # A client may have many users using different Facebook apps developed by the client
@@ -30,6 +31,8 @@ class App(db.Model):
     app_secret = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
     domain = db.LinkProperty(required=True)
+    created = db.DateTimeProperty(required=True, auto_now_add=True)
+    last_modified = db.DateTimeProperty(required=True, auto_now=True)
 
 class App_User(db.Model):
     app_id = db.StringProperty(required=True)#reference property, should fix here. A workaround.
@@ -39,8 +42,8 @@ class App_User(db.Model):
     profile_url = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)
     token_status = db.StringProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    updated = db.DateTimeProperty(auto_now=True)
+    created = db.DateTimeProperty(required=True, auto_now_add=True)
+    last_modified = db.DateTimeProperty(required=True, auto_now=True)
 
 class MonitoredUser(db.Model):
     id = db.StringProperty(required=True)

@@ -226,11 +226,11 @@ class PostMessagesHandler(BaseClientHandler):
             online_presence = check_online_presence(user)
             if online_presence is None:
                 online_presence = "error" #cannot determine online presence
-            monitor_user = MonitoredUser(app_id=app_id, id=user.id,
+            monitored_user = MonitoredUser(app_id=app_id, id=user.id,
                                          last_online_presence=online_presence,
                                          message=message, access_token=user.access_token,
                                          time_to_post=time_to_post)
-            monitor_user.put()
+            monitored_user.put()
 
     def schedule_a_post(self, app_id, users, time_to_post, message): 
         deferred_queue = taskqueue.Queue(name="deferred-queue")
@@ -257,7 +257,6 @@ class Post_A_Message(webapp.RequestHandler):
 class OnlinePresenceMonitor(webapp.RequestHandler):
     def get(self):
         monitored_users = MonitoredUser.all()
-       
         for user in monitored_users:
             message = user.message
             access_token = user.access_token
@@ -323,8 +322,8 @@ class SearchHandler(BaseClientHandler):
 class PopulateDatabase(BaseClientHandler):
     def get(self):
         import utils.populate
-        utils.populate.populate_datastore()
         utils.populate.populate_timezone()
+        utils.populate.populate_datastore()
         logging.info("GET /populate 200 OK. Datastore populated!")
         self.response.out.write("GET /populate 200 OK. Datastore populated!")
 
@@ -348,14 +347,10 @@ class SaveUserPermissionsHandler(BaseClientHandler):
         user.put()
 
 clients = {
-  'client1.' + __SITE_DOMAIN__: webapp.WSGIApplication([
-    ('/', Client1Handler)
-    ]),
+    #'client1.' + __SITE_DOMAIN__: webapp.WSGIApplication([]),
            
-  'client2.' + __SITE_DOMAIN__: webapp.WSGIApplication([
-    ('/', MasterHandler)
-    ]),
-           
+    #'client2.' + __SITE_DOMAIN__: webapp.WSGIApplication([]), 
+
   __SITE_DOMAIN__: webapp.WSGIApplication([
     (r"/select_permissions", SelectPermissionsHandler),
     (r"/ask_permissions", AskPermissionsHandler),

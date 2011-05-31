@@ -8,35 +8,40 @@ from google.appengine.ext import db
 from models import Client
 from models import Client_User
 from models import App
+from models import TimeZone
 
 def populate_datastore():
     client_key_name1='client01'
-    client1 = Client(key_name=client_key_name1, id='12345678', name='Organic Oranges LLC', domain=db.Link("http://client1.clickin-tech.appspot.com"))
+    client1 = Client(key_name=client_key_name1, id='12345678', name='Organic Oranges LLC', domain=db.Link("http://client1.clickin-prod.appspot.com"))
     client1.put()
     
     client_key_name2='client02'
-    client2 = Client(key_name=client_key_name2, id='87654321', name='Green Trees Inc.', domain=db.Link("http://client2.clickin-tech.appspot.com"))
+    client2 = Client(key_name=client_key_name2, id='87654321', name='Green Trees Inc.', domain=db.Link("http://client2.clickin-prod.appspot.com"))
     client2.put()
+    
+    timezones = TimeZone.all()
+    timezones.filter('offset =', 7.0) #(UTC + 7:00) Bangkok, Hanoi, Jakarta
+    default_timezone = timezones.get()
     
     admin_key_name1='admin001'
     admin1 = Client_User(key_name=admin_key_name1, client=client1, id='001002', name='Daniel Alves', 
-                        email='client1_ad1@hotmail.com')
+                        email='client1_ad1@hotmail.com', timezone=default_timezone)
     admin1.put()
         
     admin_key_name2='admin002'
     admin2 = Client_User(key_name=admin_key_name2, client=client1, id='001005', name='Andres Iniesta', 
-                        email='client1_ad2@yahoo.com')
+                        email='client1_ad2@yahoo.com', timezone=default_timezone)
     admin2.put()
         
 
     admin_key_name5='admin05'
     admin5 = Client_User(key_name=admin_key_name5, client=client2, id='0010011', name='Josep Guardiola', 
-                        email='client2_ad1@yahoo.com')
+                        email='client2_ad1@yahoo.com', timezone=default_timezone)
     admin5.put()
         
     admin_key_name6='admin06'
     admin6 = Client_User(key_name=admin_key_name6, client=client2, id='0010016', name='Lionel Messi', 
-                        email='client2_ad2@live.com')
+                        email='client2_ad2@live.com', timezone=default_timezone)
     admin6.put()
         
     #ClickIn People Search
@@ -70,8 +75,8 @@ def populate_datastore():
     #Italy Flight Competition 2
     app_key_name4='app4'
     app4 = App(key_name=app_key_name4, client=client1, app_id='125489974194774', 
-               api_key='api_key_placeholder', 
-               app_secret='app_secret_placeholder',
+               api_key='API_Key_Placeholder', 
+               app_secret='App_Secret_Placeholder',
                name = 'Italy Flight Competition 2', 
                domain=db.Link("http://www.iti-services.com.au/brian/"))
 
