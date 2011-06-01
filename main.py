@@ -22,8 +22,6 @@ from models import App_User
 from models import MonitoredUser
 from models import TimeZone
 
-from clients.client1 import Client1Handler
-
 from _globalConfiguration_ import __PROTOCOL__
 from _globalConfiguration_ import __SITE_DOMAIN__
 
