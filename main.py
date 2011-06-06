@@ -246,7 +246,7 @@ class Post_A_Message(webapp.RequestHandler):
         access_token = cgi.escape(self.request.get("access_token"))
         user_id = cgi.escape(self.request.get("user_id"))
         app_id = cgi.escape(self.request.get("app_id"))
-        message = cgi.escape(self.request.get("message"))        
+        message = self.request.get("message")        
         graph = facebook.GraphAPI(access_token)
         graph.put_wall_post(message=message, profile_id=user_id)
         logging.debug("App ID " + app_id + " | Scheduled posting | User ID " 
