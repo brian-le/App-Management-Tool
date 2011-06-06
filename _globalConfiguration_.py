@@ -5,4 +5,4 @@ Created on May 30, 2011
 '''
 
 __PROTOCOL__ = "http://" 
-__SITE_DOMAIN__ = "clickin-prod.appspot.com" 
+__SITE_DOMAIN__ = "clickin-tech.appspot.com" 
