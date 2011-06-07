@@ -249,7 +249,7 @@ class Post_A_Message(webapp.RequestHandler):
         message = self.request.get("message")        
         graph = facebook.GraphAPI(access_token)
         graph.put_wall_post(message=message, profile_id=user_id)
-        logging.debug("App ID " + app_id + " | Scheduled posting | User ID " 
+        logging.info("App ID " + app_id + " | Scheduled posting | User ID " 
                       + user_id + " | Message: " + message)
 
 class OnlinePresenceMonitor(webapp.RequestHandler):
@@ -267,11 +267,11 @@ class OnlinePresenceMonitor(webapp.RequestHandler):
                     if now > user.time_to_post:
                         graph.put_wall_post(message=message, profile_id=user.id)
                         user.delete() #remove this user's pending post from the cron list
-                        logging.debug("Online presence + scheduled posting User ID " + user.id 
+                        logging.info("Online presence + scheduled posting User ID " + user.id 
                                       + " | Message: " + message)
                 else:
                     graph.put_wall_post(message=message, profile_id=user.id)
-                    logging.debug("Online posting User ID " + user.id + " | Message: " + message)
+                    logging.info("Online posting User ID " + user.id + " | Message: " + message)
                     user.delete() #remove this user's pending post from the cron list
 
 class SearchHandler(BaseClientHandler):    
