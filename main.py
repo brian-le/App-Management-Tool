@@ -276,25 +276,30 @@ class OnlinePresenceMonitor(webapp.RequestHandler):
 
 class SearchHandler(BaseClientHandler):    
     def get(self):
+        '''
+        encoded_app_id = self.request.get("app_id")
+        app_id = base64.b64decode(encoded_app_id)
+
         app = cgi.escape(self.request.get("app"))
         if app:
             self.redirect("/search?app_id=" + base64.b64encode(app))
+        '''
         
-        app_id = cgi.escape(self.request.get("app_id"))
-        if app_id:
-            original_query = cgi.escape(self.request.get("query"))
-            if original_query:
-                app_id = base64.b64decode(app_id)
-                #Remove leading, trailing, and multiple white spaces from the string query.
-                query = original_query
-                query = ' '.join(query.split())
-                results = self.search(app_id, query=query)
-                if len(results) > 0:
-                    self.render(u'search_results', users=results)
-                else:
-                    self.render(u'search_results', users=None, query=query)                
+        encoded_app_id = self.request.get("app_id")
+        original_query = cgi.escape(self.request.get("query"))
+        
+        if original_query:
+            app_id = base64.b64decode(encoded_app_id)
+            #Remove leading, trailing, and multiple white spaces from the string query.
+            query = original_query
+            query = ' '.join(query.split())
+            results = self.search(app_id, query=query)
+            if len(results) > 0:
+                self.render(u'search_results', users=results)
             else:
-                self.render(u'search_form', app_id=app_id)
+                self.render(u'search_results', users=None, query=query)                
+        else:
+            self.render(u'search_form', app_id=encoded_app_id)
         
     def search(self, app_id, query):
         #case-insensitive matching
