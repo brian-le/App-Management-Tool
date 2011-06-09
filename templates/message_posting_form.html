@@ -14,14 +14,18 @@
 				<th></th>
 				<th>Name</th>
 				<th>User ID</th>
-				<th>Email</th>
+				<th>Location</th>
+				<th>Birthday</th>
+				<th>Gender</th>
 			</tr>
 			{% for user in users %}
 				<tr>
 					<td><input type="checkbox" name="selected_users" value="{{ user.id }}" /></td>
 					<td><a href="{{  user.profile_url }}"><em>{{ user.name }}</em></a></td>
 					<td>{{ user.id }}</td>
-					<td>{{ user.email }}</td>
+					<td>{{ user.location }}</td>
+					<td>{{ user.birthday }}</td>
+					<td>{{ user.gender }}</td>
 				</tr>
     		{% endfor %}     	
     	</table>

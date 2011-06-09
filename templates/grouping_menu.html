@@ -4,14 +4,30 @@
 	<link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css" />
   </head>
   <body>
-  	<form name="grouping_form" action="{{ protocol }}{{ siteDomain }}/grouping" method="GET">
-  		Country
-		<select name="country">
-			<option value="1">Australia</option>
-			<option value="2">Vietnam</option>
-			<option value="3">United States of America </option>
+  	<form name="grouping_form" action="{{ protocol }}{{ siteDomain }}/grouping" method="POST">
+		<b>Gender</b><br />
+			&nbsp;&nbsp;<input type="radio" name="gender" value="male" /> Male<br />
+			&nbsp;&nbsp;<input type="radio" name="gender" value="female" /> Female<br />
+		<br />
+		
+		<b>Age</b><br />
+		<select name="age">
+		 	 <option value="teenager">Less than 18 years old</option>
+			 <option value="young_adult">From 18 to 23 years old</option>
+			 <option value="adult">More than 23 years old</option>
 		</select>
-		<input type="submit" value="Select" />
+		<br /><br />
+
+		<b>Country</b>&nbsp;
+		<select name="countries" multiple="multiple" size="5">
+		 	{% for country in countries %}
+				<option value="{{ country }}">{{ country }}</option>
+    		{% endfor %}     	
+		</select>
+		<br /><br />
+		<input type="hidden"  name="app_id" value="{{ app_id }}"/>
+		<input type="submit" value="Filter" />
+
 	</form>
   </body>
 </html>

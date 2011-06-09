@@ -1,7 +1,8 @@
 import os, cgi
 import urllib, urllib2, logging
 import base64
-from datetime import datetime
+#from datetime import datetime, timedelta
+import datetime
 import time
 
 import facebook
@@ -199,7 +200,11 @@ class PostMessagesHandler(BaseClientHandler):
         selected_users = db.Query(App_User).filter("app_id =", app_id).filter("id IN ", selected_user_ids)
         timezone = cgi.escape(self.request.get("timezone"))
         timezone = float(timezone)
-        timedelta = datetime.timedelta(hours= -timezone)
+        
+        #self.response.out.write("Time Zone: %f<br />" % timezone)
+        timedelta = datetime.timedelta(hours=(-timezone))
+        #self.response.out.write("Time Delta:<br />") 
+        #self.response.out.write(timedelta)
         
         schedule = self.request.get_all("schedule")
         time_to_post = None
@@ -350,7 +355,7 @@ class SaveUserPermissionsHandler(BaseClientHandler):
                         app_id=app_id,
                         name=profile["name"],
                         gender = profile["gender"], 
-                        birthday = datetime.strptime(profile["birthday"], "%m/%d/%Y"),
+                        birthday = datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y"),
                         location = profile["location"]["name"],
                         access_token=access_token,
                         profile_url=profile["link"], 
@@ -359,13 +364,58 @@ class SaveUserPermissionsHandler(BaseClientHandler):
 
 class GroupingMenu(BaseClientHandler):
     def get(self):
-        self.render(u'grouping_menu', protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
-        #calculate the country list
-        
+        encoded_app_id = self.request.get("app_id")
+        app_id = base64.b64decode(encoded_app_id)        
+        app_users = App_User.all()
+        app_users.filter('app_id =', app_id)
 
+        #compile country list
+        from utils.geocode import get_country
+        countries = set()
+        for user in app_users:
+            location = user.location
+            country = get_country(address=location, sensor="false")
+            countries.add(country) 
+         
+        self.render(u'grouping_menu', 
+                    protocol=__PROTOCOL__, 
+                    siteDomain=__SITE_DOMAIN__, 
+                    app_id = encoded_app_id,
+                    countries=countries)
+        
 class GroupingHandler(BaseClientHandler):
-    def get(self):
-        self.response.out.write("I am the handler...")
+    def post(self):
+        encoded_app_id = self.request.get("app_id")
+        app_id = base64.b64decode(encoded_app_id)
+        gender = self.request.get("gender")
+        age = self.request.get("age")
+        countries = self.request.get_all("countries")
+        
+        '''
+        self.response.out.write("App ID: %s.<br />" % app_id)
+        self.response.out.write("Gender: %s.<br />" % gender)
+        self.response.out.write("Age: %s.<br />" % age)
+        self.response.out.write("Countries: %s.<br />" % countries)
+        '''
+        
+        app_users = App_User.all()
+        app_users.filter('app_id =', app_id)
+        
+        from utils.geocode import filter_by_countries 
+        users = filter_by_countries(app_users, countries)
+        admin = authorizedAdminClient()
+        apps = App.all()
+        apps.filter('app_id =', app_id)
+        app = apps.get()
+        from utils.timezone import pretty_print
+        
+        self.render(u'message_posting_form', app=app, users=users,
+                    date_range=range(1, 32), year_range=range(2011, 2021),
+                    hour_range=range(24), minute_range=range(60),
+                    timezone_description=pretty_print(admin.timezone),
+                    timezone=admin.timezone.offset,
+                    protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
+        
 
 clients = {
     #'client1.' + __SITE_DOMAIN__: webapp.WSGIApplication([]),
