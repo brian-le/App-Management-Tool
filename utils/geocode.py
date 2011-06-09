@@ -27,13 +27,5 @@ def get_country(address,sensor, **geo_args):
     country = address.split(', ')[-1]
     return country
 
-def filter_by_countries(app_users, countries):
-    users = set()
-    for user in app_users:
-        country = get_country(address=user.location, sensor="false")
-        if country in countries:
-            users.add(user)             
-    return users
-
 if __name__ == '__main__':
     print get_country(address="123 Amphitheatre Pkwy Mountain View, CA", sensor="false")

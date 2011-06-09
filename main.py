@@ -1,7 +1,6 @@
 import os, cgi
 import urllib, urllib2, logging
 import base64
-#from datetime import datetime, timedelta
 import datetime
 import time
 
@@ -401,8 +400,11 @@ class GroupingHandler(BaseClientHandler):
         app_users = App_User.all()
         app_users.filter('app_id =', app_id)
         
-        from utils.geocode import filter_by_countries 
+        from utils.filters import filter_by_countries
+        from utils.filters import filter_by_gender 
         users = filter_by_countries(app_users, countries)
+        users = filter_by_gender(users, gender)
+        
         admin = authorizedAdminClient()
         apps = App.all()
         apps.filter('app_id =', app_id)
