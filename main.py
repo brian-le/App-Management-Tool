@@ -1,7 +1,8 @@
 import os, cgi
 import urllib, urllib2, logging
 import base64
-import time, datetime
+from datetime import datetime
+import time
 
 import facebook
 
@@ -344,10 +345,27 @@ class SaveUserPermissionsHandler(BaseClientHandler):
                                            urllib.urlencode(dict(access_token=access_token))))        
         user_id = str(profile["id"])
         key_name = app_id + "_" + user_id
-        user = App_User(key_name=key_name, id=user_id, app_id=app_id,
-                        name=profile["name"], access_token=access_token,
-                        profile_url=profile["link"], token_status="Active")
+        user = App_User(key_name=key_name, 
+                        id=user_id, 
+                        app_id=app_id,
+                        name=profile["name"],
+                        gender = profile["gender"], 
+                        birthday = datetime.strptime(profile["birthday"], "%m/%d/%Y"),
+                        location = profile["location"]["name"],
+                        access_token=access_token,
+                        profile_url=profile["link"], 
+                        token_status="Active")
         user.put()
+
+class GroupingMenu(BaseClientHandler):
+    def get(self):
+        self.render(u'grouping_menu', protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
+        #calculate the country list
+        
+
+class GroupingHandler(BaseClientHandler):
+    def get(self):
+        self.response.out.write("I am the handler...")
 
 clients = {
     #'client1.' + __SITE_DOMAIN__: webapp.WSGIApplication([]),
@@ -369,6 +387,8 @@ clients = {
     (r"/account", AdminAccountManager),
     (r"/save_account", SaveAccountHandler),
     (r"/allow", SaveUserPermissionsHandler),
+    (r"/groupingOptions", GroupingMenu),
+    (r"/grouping", GroupingHandler),
     #(r"/populate", PopulateDatabase),
     (r"/", MasterHandler)])
 }

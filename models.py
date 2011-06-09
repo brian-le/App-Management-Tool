@@ -38,6 +38,9 @@ class App_User(db.Model):
     app_id = db.StringProperty(required=True)#reference property, should fix here. A workaround.
     id = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
+    gender = db.StringProperty()
+    birthday = db.DateTimeProperty()
+    location = db.PostalAddressProperty()
     email = db.EmailProperty()
     profile_url = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)

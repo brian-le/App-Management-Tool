@@ -5,8 +5,9 @@
   <body>
 	<h3>{{ app.name }} Menu (2)</h3>
 	<div>
+	<a href="{{ protocol }}{{ siteDomain }}/groupingOptions?app_id={{ encoded_app_id }}"><h4>Grouping <i>{{ app.name }}</i> Users</h4></a>
 	<a href="{{ protocol }}{{ siteDomain }}/show_users?app_id={{ encoded_app_id }}"><h4>Schedule Message Posting</h4></a>
-	<a href="{{ protocol }}{{ siteDomain }}/search?app_id={{ encoded_app_id }}"><h4>Search {{ app.name }} Data</h4></a>	
+	<a href="{{ protocol }}{{ siteDomain }}/search?app_id={{ encoded_app_id }}"><h4>Search <i>{{ app.name }}</i> Data</h4></a>	
 	</div>
   </body>
 </html>
