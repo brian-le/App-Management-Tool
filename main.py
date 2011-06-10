@@ -396,6 +396,7 @@ class GroupingHandler(BaseClientHandler):
         from utils.filters import filter_by_gender
         from utils.filters import filter_by_age 
         
+        
         users = app_users
         if countries:
             users = filter_by_countries(app_users, countries)
