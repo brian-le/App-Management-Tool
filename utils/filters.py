@@ -28,3 +28,28 @@ def isOfAge(birthDate, age=18):
         return (birthDate.month < endDate.month or 
                 (birthDate.month == endDate.month and birthDate.day < endDate.day))         
     return years > age
+
+def filter_by_age(app_users, lower, upper=None):
+    users = set()
+    for user in app_users:
+        if isOfAge(user.birthday, lower):
+            users.add(user)
+        if upper:
+            if isOfAge(user.birthday, upper):
+                users.remove(user)
+    return users
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

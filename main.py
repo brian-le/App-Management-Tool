@@ -117,8 +117,8 @@ class AskPermissionsHandler(BaseClientHandler):
         apps = App.all()
         apps.filter('app_id =', app_id)
         app = apps.get()
-        self.render(u'permissions', app=app, 
-                    protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__ )
+        self.render(u'permissions', app=app,
+                    protocol=__PROTOCOL__, siteDomain=__SITE_DOMAIN__)
 
 class PermissionsHandler(BaseClientHandler):
     def post(self):
@@ -349,15 +349,15 @@ class SaveUserPermissionsHandler(BaseClientHandler):
                                            urllib.urlencode(dict(access_token=access_token))))        
         user_id = str(profile["id"])
         key_name = app_id + "_" + user_id
-        user = App_User(key_name=key_name, 
-                        id=user_id, 
+        user = App_User(key_name=key_name,
+                        id=user_id,
                         app_id=app_id,
                         name=profile["name"],
-                        gender = profile["gender"], 
-                        birthday = datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y"),
-                        location = profile["location"]["name"],
+                        gender=profile["gender"],
+                        birthday=datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y"),
+                        location=profile["location"]["name"],
                         access_token=access_token,
-                        profile_url=profile["link"], 
+                        profile_url=profile["link"],
                         token_status="Active")
         user.put()
 
@@ -376,10 +376,10 @@ class GroupingMenu(BaseClientHandler):
             country = get_country(address=location, sensor="false")
             countries.add(country) 
          
-        self.render(u'grouping_menu', 
-                    protocol=__PROTOCOL__, 
-                    siteDomain=__SITE_DOMAIN__, 
-                    app_id = encoded_app_id,
+        self.render(u'grouping_menu',
+                    protocol=__PROTOCOL__,
+                    siteDomain=__SITE_DOMAIN__,
+                    app_id=encoded_app_id,
                     countries=countries)
         
 class GroupingHandler(BaseClientHandler):
@@ -389,21 +389,28 @@ class GroupingHandler(BaseClientHandler):
         gender = self.request.get("gender")
         age = self.request.get("age")
         countries = self.request.get_all("countries")
-        
-        '''
-        self.response.out.write("App ID: %s.<br />" % app_id)
-        self.response.out.write("Gender: %s.<br />" % gender)
-        self.response.out.write("Age: %s.<br />" % age)
-        self.response.out.write("Countries: %s.<br />" % countries)
-        '''
-        
         app_users = App_User.all()
         app_users.filter('app_id =', app_id)
         
         from utils.filters import filter_by_countries
-        from utils.filters import filter_by_gender 
-        users = filter_by_countries(app_users, countries)
-        users = filter_by_gender(users, gender)
+        from utils.filters import filter_by_gender
+        from utils.filters import filter_by_age 
+        
+        users = app_users
+        if countries:
+            users = filter_by_countries(app_users, countries)
+        
+        if (gender != 'all'):
+            users = filter_by_gender(users, gender)
+            
+        if (age == 'teenager'):
+            users = filter_by_age(users, 0, 18)
+        
+        if (age == 'young_adult'):
+            users = filter_by_age(users, 18, 23)
+            
+        if (age == 'adult'):
+            users = filter_by_age(users, 23)
         
         admin = authorizedAdminClient()
         apps = App.all()
@@ -420,10 +427,6 @@ class GroupingHandler(BaseClientHandler):
         
 
 clients = {
-    #'client1.' + __SITE_DOMAIN__: webapp.WSGIApplication([]),
-           
-    #'client2.' + __SITE_DOMAIN__: webapp.WSGIApplication([]), 
-
   __SITE_DOMAIN__: webapp.WSGIApplication([
     (r"/select_permissions", SelectPermissionsHandler),
     (r"/ask_permissions", AskPermissionsHandler),
