@@ -122,7 +122,6 @@ class AskPermissionsHandler(BaseClientHandler):
 
 class PermissionsHandler(BaseClientHandler):
     def post(self):
-        #self.response.out.write("Permissions handler is coming...")
         arguments = self.request.arguments()
         scope = set()
         for argument in arguments:
@@ -200,11 +199,7 @@ class PostMessagesHandler(BaseClientHandler):
         timezone = cgi.escape(self.request.get("timezone"))
         timezone = float(timezone)
         
-        #self.response.out.write("Time Zone: %f<br />" % timezone)
         timedelta = datetime.timedelta(hours=(-timezone))
-        #self.response.out.write("Time Delta:<br />") 
-        #self.response.out.write(timedelta)
-        
         schedule = self.request.get_all("schedule")
         time_to_post = None
         if "later" in schedule:
