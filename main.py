@@ -367,6 +367,8 @@ class GroupingMenu(BaseClientHandler):
         app_id = base64.b64decode(encoded_app_id)        
         app_users = App_User.all()
         app_users.filter('app_id =', app_id)
+        from utils.populate import update_app_users
+        update_app_users(app_id)
 
         #compile country list
         from utils.geocode import get_country

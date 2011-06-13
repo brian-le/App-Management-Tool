@@ -4,11 +4,15 @@ Created on May 20, 2011
 @author: Brian
 '''
 from google.appengine.ext import db
+from django.utils import simplejson as json
+import urllib, logging
+import datetime
 
 from models import Client
 from models import Client_User
 from models import App
 from models import TimeZone
+from models import App_User
 
 def populate_datastore():
     client_key_name1='client01'
@@ -84,7 +88,7 @@ def populate_datastore():
       
 
 def populate_timezone():
-    #Source: http://forums.asp.net/p/1518462/3641104.aspx
+    #Reference: http://forums.asp.net/p/1518462/3641104.aspx
     time_zones = [(0, 'Casablanca'),
                   (0, 'Coordinated Universal Time'),
                   (0, 'Dublin, Edinburgh, Lisbon, London'),
@@ -149,3 +153,17 @@ def populate_timezone():
     for timezone in time_zones:
         entry = TimeZone(offset=float(timezone[0]), description=timezone[1])
         entry.put()
+        
+# Update personal information of users of the given Facebook app
+def update_app_users(app_id):
+    app_users = App_User.all()
+    app_users.filter('app_id =', app_id)
+    for user in app_users:
+        access_token = user.access_token
+        profile = json.load(urllib.urlopen("https://graph.facebook.com/me?" + urllib.urlencode(dict(access_token=access_token))))                
+        user.birthday = datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y")
+        user.gender = profile["gender"]
+        user.location = profile["location"]["name"]
+        user.name = profile["name"]
+        user.profile_url = profile["link"]
+        user.put()
