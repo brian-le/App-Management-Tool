@@ -337,20 +337,32 @@ class SaveUserPermissionsHandler(BaseClientHandler):
     def post(self):
         app_id = self.request.get("app_id")
         access_token = self.request.get("access_token")
+        scope = self.request.get("scope")
+        scope = scope.split(",")
         
-        logging.info("App ID %s || Access Token: %s" % 
-                      (app_id, access_token))
+        #logging.info("Scope: '%s' || App ID %s || Access Token: %s" % 
+        #              (scope, app_id, access_token))
         profile = json.load(urllib.urlopen("https://graph.facebook.com/me?" + 
                                            urllib.urlencode(dict(access_token=access_token))))        
         user_id = str(profile["id"])
         key_name = app_id + "_" + user_id
+        birthday = None
+        location = None
+        # getting extended user information
+        if "birthday" in profile and not (profile["birthday"] is None):
+            birthday=datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y")
+            
+        if "location" in profile and not (profile["location"] is None):
+            location=profile["location"]["name"]
+  
         user = App_User(key_name=key_name,
                         id=user_id,
                         app_id=app_id,
                         name=profile["name"],
                         gender=profile["gender"],
-                        birthday=datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y"),
-                        location=profile["location"]["name"],
+                        birthday=birthday,
+                        location=location,
+                        permissions = scope,
                         access_token=access_token,
                         profile_url=profile["link"],
                         token_status="Active")

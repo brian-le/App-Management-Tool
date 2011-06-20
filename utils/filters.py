@@ -38,18 +38,4 @@ def filter_by_age(app_users, lower, upper=None):
             if isOfAge(user.birthday, upper):
                 users.remove(user)
     return users
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        

@@ -42,6 +42,7 @@ class App_User(db.Model):
     birthday = db.DateTimeProperty()
     location = db.PostalAddressProperty()
     email = db.EmailProperty()
+    permissions = db.ListProperty(str)
     profile_url = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)
     token_status = db.StringProperty(required=True)
