@@ -154,16 +154,33 @@ def populate_timezone():
         entry = TimeZone(offset=float(timezone[0]), description=timezone[1])
         entry.put()
         
-# Update personal information of users of the given Facebook app
+def isRelevant(user):
+    return ('user_birthday' in user.permissions) and ('user_location' in user.permissions) 
+
+# Update personal information of users of the given Facebook app in App_User table
 def update_app_users(app_id):
     app_users = App_User.all()
     app_users.filter('app_id =', app_id)
     for user in app_users:
-        access_token = user.access_token
-        profile = json.load(urllib.urlopen("https://graph.facebook.com/me?" + urllib.urlencode(dict(access_token=access_token))))                
-        user.birthday = datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y")
-        user.gender = profile["gender"]
-        user.location = profile["location"]["name"]
-        user.name = profile["name"]
-        user.profile_url = profile["link"]
-        user.put()
+        if isRelevant(user):
+            access_token = user.access_token
+            profile = json.load(urllib.urlopen("https://graph.facebook.com/me?" + urllib.urlencode(dict(access_token=access_token))))
+
+            birthday = None
+            location = None
+            # getting extended user information
+            if "birthday" in profile and not (profile["birthday"] is None):
+                birthday=datetime.datetime.strptime(profile["birthday"], "%m/%d/%Y")
+            
+            if "location" in profile and not (profile["location"] is None):
+                location=profile["location"]["name"]
+
+            user.name = profile["name"]
+            user.profile_url = profile["link"]
+            user.gender = profile["gender"]
+            user.birthday = birthday
+            user.location = location
+            user.put()
+            logging.info("Updated: %s." % user.name)
+        else:
+            logging.info("Not relevant user: %s." % user.name)
