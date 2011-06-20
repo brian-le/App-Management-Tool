@@ -155,7 +155,7 @@ def populate_timezone():
         entry.put()
         
 def isRelevant(user):
-    return ('user_birthday' in user.permissions) and ('user_location' in user.permissions) 
+    return ('user_location' in user.permissions) 
 
 # Update personal information of users of the given Facebook app in App_User table
 def update_app_users(app_id):
