@@ -78,11 +78,11 @@ def populate_datastore():
     
     #Italy Flight Competition 2
     app_key_name4='app4'
-    app4 = App(key_name=app_key_name4, client=client1, app_id='125489974194774', 
+    app4 = App(key_name=app_key_name4, client=client1, app_id='139671032774745', 
                api_key='API_Key_Placeholder', 
                app_secret='App_Secret_Placeholder',
-               name = 'Italy Flight Competition 2', 
-               domain=db.Link("http://www.iti-services.com.au/brian/"))
+               name = 'Australia Flight Competition', 
+               domain=db.Link("http://www.iti-services.com.au/brian/competitionVoyage-fr/"))
 
     app4.put()      
       
