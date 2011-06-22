@@ -454,7 +454,7 @@ clients = {
     (r"/allow", SaveUserPermissionsHandler),
     (r"/groupingOptions", GroupingMenu),
     (r"/grouping", GroupingHandler),
-    #(r"/populate", PopulateDatabase),
+    (r"/populate", PopulateDatabase),
     (r"/", MasterHandler)])
 }
 

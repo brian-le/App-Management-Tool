@@ -23,6 +23,10 @@ def populate_datastore():
     client2 = Client(key_name=client_key_name2, id='87654321', name='Green Trees Inc.', domain=db.Link("http://client2.clickin-prod.appspot.com"))
     client2.put()
     
+    client_key_name3='client03'
+    client3 = Client(key_name=client_key_name3, id='09090998', name='SuperKoala', domain=db.Link("http://superkoala.clickin-prod.appspot.com"))
+    client3.put()
+
     timezones = TimeZone.all()
     timezones.filter('offset =', 7.0) #(UTC + 7:00) Bangkok, Hanoi, Jakarta
     default_timezone = timezones.get()
@@ -47,6 +51,11 @@ def populate_datastore():
     admin6 = Client_User(key_name=admin_key_name6, client=client2, id='0010016', name='Lionel Messi', 
                         email='client2_ad2@live.com', timezone=default_timezone)
     admin6.put()
+
+    admin_key_name7='admin07'
+    admin7 = Client_User(key_name=admin_key_name7, client=client3, id='0010434', name='Carlos Santini', 
+                        email='appmgt@clickin.com.au', timezone=default_timezone)
+    admin7.put()
         
     #ClickIn People Search
     app_key_name1='app1'
@@ -76,12 +85,12 @@ def populate_datastore():
 
     app3.put()
     
-    #Italy Flight Competition 2
+    #SuperKoala - Voyage en Australie
     app_key_name4='app4'
-    app4 = App(key_name=app_key_name4, client=client1, app_id='139671032774745', 
-               api_key='API_Key_Placeholder', 
-               app_secret='App_Secret_Placeholder',
-               name = 'Australia Flight Competition', 
+    app4 = App(key_name=app_key_name4, client=client3, app_id='139671032774745', 
+               api_key='API Key Placeholder', 
+               app_secret='App Secret Placeholder',
+               name = 'Flight Competition FR', 
                domain=db.Link("http://www.iti-services.com.au/brian/competitionVoyage-fr/"))
 
     app4.put()      
